@@ -4,7 +4,7 @@
 #
 Name     : bison
 Version  : 3.0.4
-Release  : 16
+Release  : 17
 URL      : http://ftp.gnu.org/gnu/bison/bison-3.0.4.tar.xz
 Source0  : http://ftp.gnu.org/gnu/bison/bison-3.0.4.tar.xz
 Summary  : No detailed summary available
