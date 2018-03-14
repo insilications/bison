@@ -1,0 +1,14 @@
+Configure miss: __fseterr
+Configure miss: whether printf supports infinite 'long double' arguments
+Configure miss: whether printf supports the 'n' directive
+Configure miss: whether isnanl works
+Configure miss: strerror_r with POSIX signature
+Configure miss: whether C symbols are prefixed with underscore at the linker level
+Configure miss: whether isnan macro works
+Configure miss: whether mbswidth is declared in <wchar.h>
+Configure miss: obstacks that work with any size object
+Configure miss: whether snprintf fully supports the 'n' directive
+Configure miss: if malloc debugging is wanted
+Configure miss: whether clock is declared
+Configure miss: Java compiler
+Configure miss: Java virtual machine
