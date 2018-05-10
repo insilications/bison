@@ -6,7 +6,7 @@
 #
 Name     : bison
 Version  : 3.0.4
-Release  : 22
+Release  : 23
 URL      : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz
 Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz
 Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz.sig
