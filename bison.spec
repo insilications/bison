@@ -6,7 +6,7 @@
 #
 Name     : bison
 Version  : 3.0.4
-Release  : 23
+Release  : 24
 URL      : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz
 Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz
 Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.0.4.tar.xz.sig
@@ -15,8 +15,9 @@ Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
 Requires: bison-bin
 Requires: bison-data
-Requires: bison-doc
+Requires: bison-license
 Requires: bison-locales
+Requires: bison-man
 BuildRequires : bison
 BuildRequires : flex
 BuildRequires : libxslt-bin
@@ -33,6 +34,8 @@ instructions.
 Summary: bin components for the bison package.
 Group: Binaries
 Requires: bison-data
+Requires: bison-license
+Requires: bison-man
 
 %description bin
 bin components for the bison package.
@@ -60,9 +63,18 @@ dev components for the bison package.
 %package doc
 Summary: doc components for the bison package.
 Group: Documentation
+Requires: bison-man
 
 %description doc
 doc components for the bison package.
+
+
+%package license
+Summary: license components for the bison package.
+Group: Default
+
+%description license
+license components for the bison package.
 
 
 %package locales
@@ -73,6 +85,14 @@ Group: Default
 locales components for the bison package.
 
 
+%package man
+Summary: man components for the bison package.
+Group: Default
+
+%description man
+man components for the bison package.
+
+
 %prep
 %setup -q -n bison-3.0.4
 
@@ -81,7 +101,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1520999632
+export SOURCE_DATE_EPOCH=1526226118
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -93,7 +113,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1520999632
+export SOURCE_DATE_EPOCH=1526226118
 rm -rf %{buildroot}
 %make_install
 %find_lang bison-runtime
@@ -141,7 +161,15 @@ rm -rf %{buildroot}
 %defattr(-,root,root,-)
 %doc /usr/share/doc/bison/*
 %doc /usr/share/info/*
-%doc /usr/share/man/man1/*
+
+%files license
+%defattr(-,root,root,-)
+/usr/share/doc/bison/COPYING
+
+%files man
+%defattr(-,root,root,-)
+/usr/share/man/man1/bison.1
+/usr/share/man/man1/yacc.1
 
 %files locales -f bison-runtime.lang -f bison.lang
 %defattr(-,root,root,-)
