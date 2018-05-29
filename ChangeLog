@@ -1,3 +1,381 @@
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.0.5
+	* NEWS: Record release date.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	bison: style: indentation fixes
+	* src/parse-gram.y: here.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	bison: please address sanitizer
+	* src/parse-gram.y (add_param): Asan does not like that the second
+	argument of strspn is not 0-terminated.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: style: fix indentation
+	* data/variant.hh (b4_symbol_variant): De-indent, as the callers are
+	indented.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: style: prefer `unsigned` to `unsigned int`
+	* data/c++.m4: here.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: style: space before paren
+	* data/c++.m4, data/lalr1.cc: here.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: fix -Wdeprecated warnings
+	For instance on test 99:
+
+	    In file included from @@.cc:56:
+	    @@.hh:409:26: error: definition of implicit copy constructor for
+	                         'stack_symbol_type' is deprecated because it
+	                         has a user-declared copy assignment operator
+	                         [-Werror,-Wdeprecated]
+	          stack_symbol_type& operator= (const stack_symbol_type& that);
+	                         ^
+
+	Reported by Derek Clegg.
+	https://lists.gnu.org/archive/html/bison-patches/2018-05/msg00036.html
+
+	* configure.ac (warn_tests): Add -Wdeprecated.
+	* data/lalr1.cc (stack_symbol_type): Add an explicit copy ctor.
+	We cannot rely on the explicit default implementation (`= default`)
+	as we support C++ 98.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix -Wdeprecated warning
+	With recent compilers:
+
+	    input.yy:49:5: error: definition of implicit copy assignment
+	                          operator for 'Object' is deprecated because
+	                          it has a user-declared destructor
+	                          [-Werror,-Wdeprecated]
+	        ~Object ()
+	        ^
+	    input.yy:130:35: note: in implicit copy assignment operator for
+	                           'Object' first required here
+	        { yylhs.value.as< Object > () = yystack_[0].value.as< Object > (); }
+
+	* tests/c++.at (Object): Add missing assignment operator.
+
+2018-05-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: update syntax-check exclusions
+	sc_two_space_separator_in_usage complains about bootstrap:
+
+	    two_space_separator_in_usage
+	    /Users/akim/src/gnu/bison/bootstrap:905:   --aux-dir $build_aux\
+	    /Users/akim/src/gnu/bison/bootstrap:906:   --doc-base $doc_base\
+	    /Users/akim/src/gnu/bison/bootstrap:907:   --lib $gnulib_name\
+	    /Users/akim/src/gnu/bison/bootstrap:908:   --m4-base $m4_base/\
+	    /Users/akim/src/gnu/bison/bootstrap:909:   --source-base $source_base/\
+	    /Users/akim/src/gnu/bison/bootstrap:910:   --tests-base $tests_base\
+	    /Users/akim/src/gnu/bison/bootstrap:911:   --local-dir $local_gl_dir\
+	    maint.mk: help2man requires at least two spaces between an option and its description
+
+	* cfg.mk: Exclude bootstrap from this check.
+
+2018-05-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	autoconf: update
+	* submodules/autoconf: Update to latest master.
+	No difference on the M4 files we use.
+
+2018-05-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-05-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	Update copyright years
+	Run `make update-copyright`.
+
+2018-05-12  Nate Guerin  <nathan.guerin@riseup.net>
+
+	Add a missing word in the documentation
+	Small patch adds the word 'to' to the documentation.
+
+2018-05-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	Examples: improve C++ style
+	* examples/variant.yy: Prefer vector to list.
+	Remove useless inline.
+
+2018-05-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	Avoid compiler warnings
+	At least GCC 7.3, with -O1 or -O2 (but not -O0 or -O3) generates
+	warnings with -Wnull-dereference when using yyformat: it fails to see
+	yyformat cannot be null.
+
+	Reported by Frank Heckenbach, https://savannah.gnu.org/patch/?9620.
+
+	* configure.ac: Use -Wnull-dereference if supported.
+	* data/glr.c, data/lalr1.cc, data/yacc.c: Define yyformat in such
+	a way that GCC cannot not see that yyformat is defined.
+	Using `default: abort();` also addresses the issue, but forces
+	the inclusion of `stdlib.h`, which we avoid.
+
+2018-05-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: fix uses of `inline`
+	Sometimes `inline` would be used in *.cc files on symbols that are not
+	exported (useless but harmless), and sometimes on exported symbols
+	such as the constructor of syntax_error (harmful: linking fails).
+
+	Reported several times, including:
+
+	- by Dennis T
+	  http://lists.gnu.org/archive/html/bug-bison/2016-03/msg00002.html
+	- by Frank Heckenbach
+	  https://savannah.gnu.org/patch/?9616
+
+	* data/c++.m4 (b4_inline): New: expands to `inline` or nothing.
+	Use it where appropriate.
+	* data/lalr1.cc: Use it where appropriate.
+
+	* tests/c++.at (Syntax error as exception): Put the scanner in another
+	compilation unit to exercise the constructor of syntax_error.
+
+2018-05-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: remove useless `inline` in CC files
+	* data/glr.cc, data/lalr1.cc: Remove `inline` from implementations
+	that are not in headers.
+
+2018-05-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: remove useless `inline` on templates
+	Templates are implicitly `inline`.
+
+	* data/c++.m4, data/lalr1.cc: Remove `inline` from templates.
+
+2018-05-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: don't use std::endl
+	* data/lalr1.cc, doc/bison.texi, etc/bench.pl.in, examples/variant.yy,
+	* tests/actions.at, tests/atlocal.in, tests/c++.at, tests/headers.at,
+	* tests/local.at, tests/types.at:
+	Don't use std::endl, it flushes uselessly, and is considered bad
+	style.
+
+2018-05-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: wrap
+	* README-hacking: Refill paragraphs.
+
+2018-05-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+	* README-hacking: Commit before bootstrapping.
+	* bootstrap.conf: gnulib_mk is no longer defined by bootstrap.
+	* bootstrap, gnulib, lib/.gitignore, m4/.gitignore: Update/regen.
+
+2018-05-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: we might need to find gnulib headers
+	    315. calc.at:596: testing Calculator  ...
+	    ++ cat
+	    ++ test x = x1
+	    ++ set +x
+	    bison/tests/calc.at:596: bison -fno-caret -o calc.c calc.y
+	    ++ bison -fno-caret -o calc.c calc.y
+	    ++ set +x
+	    bison/tests/calc.at:596: $BISON_C_WORKS
+	    stderr:
+	    stdout:
+	    ++ set +x
+	    bison/tests/calc.at:596: $CC $CFLAGS $CPPFLAGS $LDFLAGS -o calc calc.c $LIBS
+	    ++ ccache clang-mp-6.0 -Qunused-arguments -O3 -g -Wall -Wextra -Wno-sign-compare -Wcast-align -Wdocumentation -Wformat -Wpointer-arith -Wwrite-strings -Wbad-function-cast -Wshadow -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wmissing-declarations -Wmissing-prototypes -Wundef -pedantic -Wsign-compare -fno-color-diagnostics -Wno-keyword-macro -Werror -Ibison/_build/6s/lib -DNDEBUG -isystem /opt/local/include -I/opt/local/include -L/opt/local/lib -o calc calc.c bison/_build/6s/lib/libbison.a -lintl -Wl,-framework -Wl,CoreFoundation
+	    stderr:
+	    In file included from calc.y:198:
+	    bison/_build/6s/lib/unistd.h:592:11: fatal error: 'getopt-pfx-core.h' file not found
+	    # include <getopt-pfx-core.h>
+	              ^~~~~~~~~~~~~~~~~~~
+	    1 error generated.
+	    stdout:
+	    bison/tests/calc.at:596: exit code was 1, expected 0
+	    315. calc.at:596: 315. Calculator  (calc.at:596): FAILED (calc.at:596)
+
+	* tests/atlocal.in (CPPFLAGS): Find gnulib's headers.
+
+2018-05-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	getargs: rename argument to avoid gnulib's renaming
+	With Clang 6.0:
+
+	      CC       src/bison-getargs.o
+	    bison/src/getargs.c:67:12: error: parameter 'option' not found in the
+	                               function declaration [-Werror,-Wdocumentation]
+	     *  \param option   option being decoded.
+	               ^~~~~~
+	    bison/src/getargs.c:67:12: note: did you mean 'rpl_option'?
+
+	* src/getargs.c: Don't use `option` as a documentation argument.
+
+2017-09-22  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Capitalize "Polish" when it's a proper adjective
+
+2017-09-17  Paul Eggert  <eggert@cs.ucla.edu>
+
+	Adjust to recent Gnulib changes
+
+2017-09-17  Paul Eggert  <eggert@cs.ucla.edu>
+
+	autoconf: update
+
+2017-09-17  Paul Eggert  <eggert@cs.ucla.edu>
+
+	gnulib: update
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	gnulib: update
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	lalr1, yacc: use the default location as initial error location
+	Currently lalr1.cc makes an out-of-bound access when trying to read @1
+	in rules with an empty rhs (i.e., when there is no @1) that raises an
+	error (YYERROR).
+
+	glr.c already gracefully handles this by using @$ as initial location
+	for the errors.  Let's do that in yacc.c and lalr1.cc.
+
+	* data/lalr1.cc, data/yacc.c: Use @$ to initialize the error location.
+	* tests/actions.at: Check that case.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	style: formatting and comment changes
+	* data/glr.c: Avoid empty lines.
+	* data/lalr1.cc: Use the same comments as in glr.c and yacc.c.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	c++: style: use "unsigned", not "unsigned int"
+	This style appears to be more traditional, at least in C++.
+	For instance in the standard, [facets.examples].
+	There are occurrences using "unsigned int" too though.
+
+	* data/lalr1.cc, data/location.cc, data/stack.hh: here.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	c++: style: remove useless "inline" and fix space issues
+	* data/lalr1.cc, data/c++.m4: Formatting changes.
+	* data/stack.hh: Remove useless "inline".
+	Add documentation.
+	* data/location.cc: Prefer {} for empty bodies.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: beware of additional warnings from GCC 5
+	* tests/synclines.at (AT_SYNCLINES_COMPILE): Avoid warnings about
+	unused functions.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: beware that clang warns about "#define private public"
+	We use this trick to write some test about internal details.  But
+	since we use -Werror, clang++ 3.6 dies issueing a warning about it.
+
+	* configure.ac (warn_tests): Disable this warning.
+
+2015-08-12  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: update our Valgrind suppression files
+	* build-aux/linux-gnu.valgrind, build-aux/darwin11.4.0.valgrind: Rename as...
+	* build-aux/Linux.valgrind, build-aux/Darwin.valgrind: these.
+	* build-aux/Linux.valgrind: Add suppression clause.
+	* configure.ac: Update.
+	* tests/local.mk: Use it.
+
+2015-03-03  Akim Demaille  <akim@lrde.epita.fr>
+
+	doc: improve html and pdf rendering
+	* doc/bison.texi: Help html conversion to understand where the
+	function names end.
+	Beware of PDF width.
+
+2015-03-03  Akim Demaille  <akim@lrde.epita.fr>
+
+	doc: fixes in the C++ part
+	Reported by Askar Safin.
+
+	http://lists.gnu.org/archive/html/bug-bison/2015-02/msg00018.html
+	http://lists.gnu.org/archive/html/bug-bison/2015-02/msg00019.html
+
+	* doc/bison.texi (Split Symbols): Fix access to token types.
+	yylval is a pointer, so use ->.
+	Fix coding style issues: space before paren.
+
+2015-02-10  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: be robust to platforms that support UTF-8 even with LC_ALL=C
+	Because musl supports UTF-8 with LC_ALL=C, gcc produces:
+
+	  input.y: In function ‘yyparse’:
+
+	instead of:
+
+	  input.y: In function 'yyparse':
+
+	Reported by Ferdinand Thiessen.
+	http://lists.gnu.org/archive/html/bug-bison/2015-02/msg00001.html
+
+	* tests/synclines.at (AT_SYNCLINES_COMPILE): Skip syncline tests when
+	we can't trust error messages issued about a function body.
+
+2015-02-10  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: java: avoid recent Java features
+	Tests 463 and 464 fail with Java 1.4 compilers.
+
+	Reported by Michael Felt.
+	<http://lists.gnu.org/archive/html/bug-bison/2015-01/msg00091.html>
+
+	* tests/javapush.at: Use StringBuffer instead of StringBuilder.
+
+2015-01-26  Akim Demaille  <akim@lrde.epita.fr>
+
+	tests: c++: fix symbol lookup issue
+	Sun C 5.13 SunOS_sparc 2014/10/20 reports errors on tests 430-432.
+
+	Reported by Dennis Clarke.
+	<http://lists.gnu.org/archive/html/bug-bison/2015-01/msg00087.html>
+
+	* tests/c++.at (Variants): Be sure to emit operator<< before using it:
+	use "%code top" rather than "%code".
+	Prefer std::vector to std::list.
+	Do not define anything in std::, to avoid undefined behavior.
+
+2015-01-23  Akim Demaille  <akim@lrde.epita.fr>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2015-01-23  Akim Demaille  <akim@lrde.epita.fr>
 
 	version 3.0.4

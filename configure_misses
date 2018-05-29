@@ -1,10 +1,9 @@
+Configure miss: crtdefs.h
 Configure miss: __fseterr
-Configure miss: whether printf supports infinite 'long double' arguments
 Configure miss: whether printf supports the 'n' directive
-Configure miss: whether isnanl works
 Configure miss: strerror_r with POSIX signature
 Configure miss: whether C symbols are prefixed with underscore at the linker level
-Configure miss: whether isnan macro works
+Configure miss: whether pthread_rwlock_rdlock prefers a writer to a reader
 Configure miss: whether mbswidth is declared in <wchar.h>
 Configure miss: obstacks that work with any size object
 Configure miss: whether snprintf fully supports the 'n' directive
