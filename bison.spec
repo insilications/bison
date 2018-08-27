@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
 Name     : bison
-Version  : 3.0.5
-Release  : 25
-URL      : https://mirrors.kernel.org/gnu/bison/bison-3.0.5.tar.xz
-Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.0.5.tar.xz
-Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.0.5.tar.xz.sig
+Version  : 3.1
+Release  : 26
+URL      : https://mirrors.kernel.org/gnu/bison/bison-3.1.tar.xz
+Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.1.tar.xz
+Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.1.tar.xz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -20,6 +20,7 @@ Requires: bison-locales
 Requires: bison-man
 BuildRequires : bison
 BuildRequires : flex
+BuildRequires : glibc-locale
 BuildRequires : libxslt-bin
 BuildRequires : valgrind
 
@@ -94,14 +95,14 @@ man components for the bison package.
 
 
 %prep
-%setup -q -n bison-3.0.5
+%setup -q -n bison-3.1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1527569170
+export SOURCE_DATE_EPOCH=1535406882
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -113,8 +114,10 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1527569170
+export SOURCE_DATE_EPOCH=1535406882
 rm -rf %{buildroot}
+mkdir -p %{buildroot}/usr/share/doc/bison
+cp COPYING %{buildroot}/usr/share/doc/bison/COPYING
 %make_install
 %find_lang bison-runtime
 %find_lang bison
@@ -158,7 +161,7 @@ rm -rf %{buildroot}
 /usr/share/aclocal/*.m4
 
 %files doc
-%defattr(-,root,root,-)
+%defattr(0644,root,root,0755)
 %doc /usr/share/doc/bison/*
 %doc /usr/share/info/*
 

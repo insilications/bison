@@ -1,3 +1,872 @@
+2018-08-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.1
+	* NEWS: Record release date.
+
+2018-08-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: tabs are ok in a Makefile
+	* cfg.mk: TABs are ok in examples/calc++/Makefile.
+
+2018-08-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: make sure the generated header is self container
+	See the previous commit.
+
+	* data/lalr1.cc: Be sure to define YY_NULLPTR.
+	* tests/headers.at: Check the case that was failing.
+
+2018-08-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: check that headers are sane
+	The header generated for variants with assertions but without
+	locations, is not self-contained.  Prepare a check for this.
+
+	* tests/headers.at (Sane headers): New, extracted from...
+	(Several parsers): here.
+
+2018-08-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	"C++: restore copy-constructor for stack_symbol_type
+	Benchmarks show that it is more efficient to keep this copy
+	constructor, rather than forcing the use of the default constructor
+	and then assignment.
+
+	This reverts commit 7ab25ad0208d00f509613e1e151aa3043cf2862f.
+
+2018-08-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: calc++: a Makefile and a README
+	* examples/calc++/Makefile, examples/calc++/README: New.
+	* examples/calc++/local.mk: Ship and install them.
+	* doc/bison.texi: Formatting changes.
+
+2018-08-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-08-25  Jiahao Li  <jiahaoli@fb.com>
+
+	variant: fix uninitialized memory access in `variant<>`
+	Currently, in bison's C++ parser template (`lalr.cc`), the `variant<>`
+	struct's `build()` method uses placement-new in the form `new (...) T`
+	to initialize a variant type.  However, for POD variant types, this
+	will leave the memory space uninitialized.  If we subsequently tries
+	to `::move` into a variant object in such state, the call can trigger
+	clang's undefined behavior sanitizer due to accessing the
+	uninitialized memory.
+
+	https://lists.gnu.org/archive/html/bison-patches/2018-08/msg00098.html
+
+	* data/variant.hh (build): Always initialize the stored value.
+
+2018-08-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-08-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: calc++: minor improvements
+	* doc/bison.texi (A Complete C++ Example): Prefer throw exceptions
+	from the scanner.
+	Show the invalid characters.
+	Since the scanner sends exceptions, it no longer needs to report
+	errors, so we can get rid of the driver's routine to report error,
+	do it in yyerror.
+	Use @group/@end group to improve rendering.
+
+2018-08-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: calc++: make sure the file name in location is set
+	Reported by Hans Åberg.
+	http://lists.gnu.org/archive/html/bug-bison/2018-08/msg00039.html
+
+	* doc/bison.texi (A Complete C++ Example): Move the token's location
+	from the scanner to the driver.
+
+2018-08-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: calc++: remove prefixes
+	This example uses the calcxx_ prefix for each class.  That's uselessly
+	heavy.
+
+	* doc/bison.texi (A Complete C++ Example): Simplify the class names.
+	Since now 'driver' denotes the class, use 'drv' for the values.
+	Formatting changes.
+
+2018-08-23  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: fix the leading empty line
+	* examples/extexi: Really avoid the first empty line.
+	Remove useless `next`.
+
+2018-08-23  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: shorten the name of the calc++ files
+	* doc/bison.texi: Turn the calc++- prefix into calc++/.
+	* examples/extexi (%file_wanted): Replace with
+	(&file_wanted): this.
+	* examples/calc++/local.mk: Adjust.
+
+2018-08-23  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: disable -Wmaybe-uninitialized in some tests
+	On these tests, at -O2 and above, GCC 8 complains that yylval may be
+	uninitialized.  But it seems wrong: it is initialized.  Rather than
+	turning off the warning in the skeleton (hence possibility hiding
+	relevant warnings of user parsers), let's turn it off in the tests
+	only.
+
+	    163: parse.error=verbose and consistent errors:      FAILED (conflicts.at:625)
+	    165: parse.error=verbose and consistent errors: lr.default-reduction=consistent FAILED (conflicts.at:635)
+	    166: parse.error=verbose and consistent errors: lr.default-reduction=accepting FAILED (conflicts.at:641)
+	    167: parse.error=verbose and consistent errors: lr.type=canonical-lr FAILED (conflicts.at:645)
+	    168: parse.error=verbose and consistent errors: parse.lac=full FAILED (conflicts.at:650)
+	    169: parse.error=verbose and consistent errors: parse.lac=full lr.default-reduction=accepting FAILED (conflicts.at:655)
+
+	We get:
+
+	    input.c: In function 'yyparse':
+	    input.c:980:9: error: 'yylval' may be used uninitialized in this function [-Werror=maybe-uninitialized]
+	     YYSTYPE yylval YY_INITIAL_VALUE (= yyval_default);
+	             ^~~~~~
+	    cc1: all warnings being treated as errors
+
+	See https://lists.gnu.org/archive/html/bison-patches/2018-08/msg00063.html.
+
+	* tests/conflicts.at (AT_CONSISTENT_ERRORS_CHECK): Disable
+	-Wmaybe-uninitialized.
+
+2018-08-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: clarify that the push parser object can be reused
+	Suggested by Rici Lake.
+	https://lists.gnu.org/archive/html/bug-bison/2018-08/msg00033.html
+
+	* doc/bison.texi: Complete description of the first node in the main
+	@menu.
+	(Push Decl): Remove the 'experimental' warnings about push parser.
+	Clarify that the push parser object can be reused in several parses.
+
+2018-08-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	lalr1.cc: support compilation with disabled support for exceptions
+	Reported by Brooks Moses <bmoses@google.com>
+	http://lists.gnu.org/archive/html/bison-patches/2018-02/msg00000.html
+
+	* data/lalr1.cc (YY_EXCEPTIONS): New.
+	Use it to disable try/catch clauses.
+
+	* doc/bison.texi (C++ Parser Interface): Document it.
+
+	* configure.ac (CXXFLAGS_NO_EXCEPTIONS): New.
+	* tests/atlocal.in: Receive it.
+	* tests/local.at (AT_FULL_COMPILE, AT_LANG_COMPILE):
+	Accept a new argument, extra compiler flags.
+	* tests/calc.at: Run the C++ calculator with exception support disabled.
+
+2018-08-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: add empty lines
+	Currently the examples are too dense, let's put empty lines where
+	'#line' would be issued.  And also remove some spurious empty
+	lines (remains from @group, @end group, etc.).
+
+	* examples/extexi: Do that.
+	* examples/local.mk (extexiFLAGS): Rename as...
+	(EXTEXIFLAGS): this.
+
+2018-08-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: check the variant example
+	* examples/mfcalc/local.mk, examples/rpcalc/local.mk: Define the
+	programs in a more natural order, source, preproc, then linker.
+
+	* examples/test: Be ready to work on programs that are not in
+	a subdir.
+	* examples/variant.test: New.
+	* examples/local.mk: Use it.
+	* examples/variant.yy: Don't use 0 for nullptr.
+	Use a more natural output for a list of string.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: fix portability issue with MSVC 2017
+	Visual Studio issues a C4146 warning on '-static_cast<unsigned>(rhs)'.
+	The code is weird, probably to cope with INT_MIN.  Let's go back to
+	using std::max (whose header is still included in position.hh...) like
+	originally, but with the needed casts.
+
+	Reported by 長田偉伸, and with help from Rici Lake.
+
+	See also
+	http://lists.gnu.org/archive/html/bug-bison/2013-02/msg00000.html
+	and commit 75ae8299840bbd854fa2474d38402bbb933c6511.
+
+	* data/location.cc (position::add_): Take min as an int.
+	Use std::max.
+	While here, get rid of a couple of useless inlines.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: fix concurrent build failure
+	Reported by Dengke Du and Robert Yang.
+	https://lists.gnu.org/archive/html/bison-patches/2017-07/msg00000.html
+
+	* src/local.mk (src/yacc): Make sure the directory exists.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	lalr1.cc: remove debug comment
+	* data/lalr1.cc: Remove a comment about indentation.
+	I'm not sure it would be nice to indent even more, it's already quite
+	of the right.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: fix the name of the GFDL section
+	Reported by dine <2500418497@qq.com>.
+	http://lists.gnu.org/archive/html/bug-bison/2016-10/msg00000.html
+
+	I mirrored what the Coreutils do.
+
+	* doc/bison.texi (Copying This Manual): Rename as...
+	(GNU Free Documentation License): this, since that the name we
+	used in the preamble.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: clarify the destructor selection example
+	Reported by Gary L Peskin.
+	http://lists.gnu.org/archive/html/help-bison/2016-02/msg00000.html
+
+	* doc/bison.texi (Destructor Decl): here.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	portability: don't use _Pragma with ICC
+	ICC defines __GNUC__ [1], but does not support GCC's _Pragma for
+	diagnostics.  As a matter of fact, I believe it does not support
+	_Pragma at all (only #pragma) [2].
+
+	Reported by Maxim Prohorenko.
+	https://savannah.gnu.org/support/index.php?108339
+
+	[1] https://software.intel.com/en-us/cpp-compiler-18.0-developer-guide-and-reference-gcc-compatibility-and-interoperability
+	[2] https://software.intel.com/en-us/cpp-compiler-18.0-developer-guide-and-reference-pragmas
+
+	* data/c.m4 (YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN): Exclude ICC from
+	the club.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: typed mid-rule actions
+	* doc/bison.texi (Mid-Rule Actions): Restructure to insert...
+	(Typed Mid-Rule Actions): this new section.
+	Move the manual translation of mid-rule actions into regular actions
+	to...
+	(Mid-Rule Action Translation): here.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	escape properly the file names in #line for printer/destructor
+	Reported by Jannick.
+	http://lists.gnu.org/archive/html/bug-bison/2017-05/msg00001.html
+
+	"Amusingly" enough, we have the same problem with %defines when the
+	parser file name has backslashes or quotes: we generate #includes with
+	an incorrect C string.
+
+	* src/output.c (prepare_symbol_definitions): Escape properly the file
+	names before passing them to M4.
+	* data/bison.m4, data/lalr1.cc: Don't simply put the file name between
+	two quotes (that should have been strong enough a smell...), expect
+	the string to be properly quoted.
+	* tests/synclines.at: New tests to check this.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix title and improve quoting
+	* tests/synclines.at: here.
+	Also, prefer '%code' to ;%{...%}' for yylex/yyerror prototypes.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/output.c: here.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/scan-code.l: here.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/parse-gram.y: Declare iterator within the for-loop.
+
+2018-08-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: style changes
+	* tests/c++.at, tests/local.at: Formatting and title changes.
+
+2018-08-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	reader: simplify the search of the start symbol
+	Suggested by Paul Eggert.
+
+	* src/reader.c (find_start_symbol): Don't check 'res', we know it is
+	not null.  That suffices to avoid the GCC warnings.
+	* bootstrap.conf: We don't need 'assume', which doesn't exist anyway.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: fix GCC8 warnings about uninitialized values
+	In 0931d14728fb4a2272399f2c927ae78e2607b4fb I removed too many
+	initializations from some ctors: some were not about base ctors, but
+	about member variables.  In fact, more of them were missing to please
+	GCC 8.
+
+	While at it, generate more natural code for C++ without variant:
+	instead of
+
+	    template <typename Base>
+	    parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+	      : Base (other)
+	      , value ()
+	    {
+	      value = other.value
+	    }
+
+	generate
+
+	    template <typename Base>
+	    parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+	      : Base (other)
+	      , value (other.value)
+	    {}
+
+	* data/c++.m4 (basic_symbol::basic_symbol): Always initialize 'value',
+	it might be a POD without a ctor.
+	* data/lalr1.cc (stack_symbol_type::stack_symbol_type): Likewise.
+	* data/variant.hh (variant::variant): Default initialize the buffer too.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: style: use %empty
+	* tests/conflicts.at: here.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix warnings in push mode
+	Fix warning with GCC 8, -DNDEBUG.
+
+	    422. push.at:83: testing Multiple impure instances ...
+	    input.y: In function 'main':
+	    input.c:1022:12: error: potential null pointer dereference [-Werror=null-dereference]
+	       if (!yyps->yynew && yyps->yyss != yyps->yyssa)
+	            ~~~~^~~~~~~
+
+	* data/yacc.c (pstate_delete): Do nothing if called on null pointer.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: avoid GCC 8 warnings
+	GCC 8 issues warnings whose root cause was a bit hard to find.
+
+	    calc.cc: In member function 'virtual int yy::parser::parse()':
+	    calc.cc:810:18: warning: '*((void*)&<anonymous> +8)' may be used uninitialized in this function [-Wmaybe-uninitialized]
+	         , location (l)
+	                      ^
+	    calc.cc: In member function 'void yy::parser::yypush_(const char*, yy::parser::stack_symbol_type&)':
+	    calc.cc:810:18: warning: '*((void*)&<anonymous> +8)' may be used uninitialized in this function [-Wmaybe-uninitialized]
+	         , location (l)
+	                      ^
+	    calc.cc: In member function 'void yy::parser::yypush_(const char*, yy::parser::state_type, yy::parser::symbol_type&)':
+	    calc.cc:810:18: warning: '*((void*)&<anonymous> +8)' may be used uninitialized in this function [-Wmaybe-uninitialized]
+	         , location (l)
+	                      ^
+
+	The problem is with locations that don't have a constructor, such as
+	Span (in calc.cc) which is POD.  It is POD on purpose: so that we can
+	use that structure to test glr.cc which cannot use non POD in its
+	(C) stacks.
+
+	* data/c++.m4 (basic_symbol): Also ensure that 'location' is
+	initialized.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: avoid compiler warnings
+	* tests/calc.at (AT_CALC_MAIN): Declare yyparse and operator<< in an
+	unnamed namespace to avoid "not declared" warnings (clang
+	-Weverything).
+	Remove useless prototypes.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: work around GCC warnings on Flex code
+	With GCC 7.3.0 and Flex 2.6.4, we get warnings on all the generated
+	scanners:
+
+	    examples/calc++/calc++-scanner.cc: In function 'void yyrestart(FILE*)':
+	    examples/calc++/calc++-scanner.cc:1611:20: error: potential null pointer dereference [-Werror=null-dereference]
+	     /* %endif */
+	      ~~~~~~~~~~~       ^
+	    examples/calc++/calc++-scanner.cc:1607:19: error: potential null pointer dereference [-Werror=null-dereference]
+	     /* %if-c-only */
+	      ~~~~~~~~~~~~~~~  ^
+	    examples/calc++/calc++-scanner.cc:1611:20: error: potential null pointer dereference [-Werror=null-dereference]
+	     /* %endif */
+	      ~~~~~~~~~~~       ^
+	    examples/calc++/calc++-scanner.cc:1607:19: error: potential null pointer dereference [-Werror=null-dereference]
+	     /* %if-c-only */
+	      ~~~~~~~~~~~~~~~  ^
+	    cc1plus: all warnings being treated as errors
+
+	Obviously the lines are incorrect, and the warnings are emitted twice.
+	Still, let's get rid of these warnings.
+
+	* doc/bison.texi, src/flex-scanner.h: Disable these warnings in code
+	generated by Flex.
+
+2018-08-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	fix incorrect C code
+	Commit 3df32101e7978eaafa63bce8908de3dcae4d9cda introduced invalid C
+	code.  Caught by GCC 7.3.0.
+
+	* bootstrap.conf (gnulib_modules): We need assume.
+	* src/reader.c (find_start_symbol): Fix the signature (too much C++,
+	sorry...).
+	Prefer 'assume' to 'assert', so that we don't have these warnings even
+	when NDEBUG is defined.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: fix Englishoes
+	* examples/README: Fix my mistakes.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: ship and install variant.yy
+	This file was meant to be shown as an example.  Install it.
+
+	* README, data/README: Put Emacs metadata in the final section.
+	* examples/README: New.
+	* examples/variant.yy: Use %empty.
+	* examples/local.mk: Install both these files.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: remove useless copy-constructor
+	We currently generate copy constructors such as the following
+	one (taken from examples/variant.yy):
+
+	    parser::stack_symbol_type::stack_symbol_type (const stack_symbol_type& that)
+	      : super_type (that.state, that.location)
+	    {
+	      switch (that.type_get ())
+	      {
+	        case 3: // TEXT
+	        case 8: // item
+	          value.copy< ::std::string > (that.value);
+	          break;
+
+	        case 7: // list
+	          value.copy< ::std::vector<std::string> > (that.value);
+	          break;
+
+	        case 4: // NUMBER
+	          value.copy< int > (that.value);
+	          break;
+
+	        default:
+	          break;
+	      }
+	    }
+
+	they are actually useless: we never need it.
+
+	* data/lalr1.cc: Don't generate the stack_symbol_type copy ctor.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: symbol constructors: add a missing reference
+	Fix a typo so that instead of
+
+	    basic_symbol::basic_symbol (typename Base::kind_type t, const int v)
+
+	we now generate
+
+	    basic_symbol::basic_symbol (typename Base::kind_type t, const int& v)
+
+	* data/variant.hh (b4_basic_symbol_constructor_declare)
+	(b4_basic_symbol_constructor_define): Add missing reference.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: remove useless calls to the base default constructor
+	* data/c++.m4, data/stack.hh, data/variant.hh: here.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: prefer size_type to unsigned for indexes
+	* data/stack.hh (size_type): New, based on the container type.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: m4: remove useless reference to 'int' in integral types
+	* m4/cxx.m4: Prefer 'unsigned' to 'unsigned int'.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: doc: remove useless reference to 'int' in integral types
+	* doc/bison.texi: Prefer 'unsigned' to 'unsigned int'.  Likewise for
+	long and short.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: lib: remove useless reference to 'int' in integral types
+	* lib/abitset.c, lib/bbitset.h, lib/bitset.c, lib/bitset.h,
+	* lib/bitset_stats.c, lib/bitsetv-print.c, lib/bitsetv.c,
+	* lib/bitsetv.h, lib/ebitset.c, lib/lbitset.c, lib/timevar.c,
+	* lib/vbitset.c:
+	Prefer 'unsigned' to 'unsigned int'.  Likewise for long and short.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: src: remove useless reference to 'int' in integral types
+	* src/AnnotationList.c, src/AnnotationList.h, src/InadequacyList.h,
+	* src/closure.c, src/closure.h, src/gram.c, src/gram.h, src/ielr.c,
+	* src/location.c, src/output.c, src/reader.c, src/relation.c,
+	* src/scan-code.l, src/scan-gram.l, src/tables.c, src/tables.h:
+	Prefer 'unsigned' to 'unsigned int'.  Likewise for long and short.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: tests: remove useless reference to 'int' in integral types
+	* tests/actions.at, tests/cxx-type.at: Prefer 'unsigned' to 'unsigned
+	int'.  Likewise for long and short.
+
+2018-08-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: data: remove useless reference to 'int' in integral types
+	* data/c.m4, data/glr.c, data/yacc.c: Prefer 'unsigned' to 'unsigned
+	int'.  Likewise for long and short.
+
+2018-08-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+	* bootstrap.conf: gnulib_mk is defined again by bootstrap.
+
+2018-08-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: avoid type aliases
+	* doc/bison.texi (C++ Location Values): Use 'unsigned' instead of
+	'uint'.
+
+2018-08-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: remove the "experimental" warning for some features
+	Several features were flagged 'experimental' and waiting for user
+	feedback to 'stabilize', but i. AFAIK, no user ever reported anything
+	about them, ii. they'be been here long enough to prove they don't do
+	harm.
+
+	* doc/bison.texi: No longer experimental: default %printer and
+	%destructor (typed: <*> and untyped: <>), %define api.value.type union
+	and variant, Java parsers, XML output, LR family (lr, ielr, lalr),
+	semantic predicates (%?).
+
+2018-08-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: check variants and typed mid-rule actions
+	See
+	http://lists.gnu.org/archive/html/bison-patches/2018-08/msg00013.html
+
+	* tests/c++.at (Variants and Typed Mid-rule Actions): New.
+
+2018-08-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix minor issues
+	* tests/actions.at: Fix some log messages.
+	Prefer #error to fprintf: it fixes the invalid use of yyoutput in
+	%destructor, and it is an even stronger check: that the code is not
+	even emitted.  The portability of #error is not really a problem here,
+	since the point is anyway to have the compilation fail.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: variant: add more assertions
+	* data/variant.hh (variant::as): Check yytypeid_ before
+	checking *yytypeid_.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: -fcaret is enabled by default
+	* doc/bison.texi (Mid-Rule Action Translation): So no need to pass it.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/closure.c, src/conflicts.c: here.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	rule actions cannot be typed
+	Make sure that we cannot apply a type to the (main) action of a rule.
+
+	* src/reader.c (grammar_rule_check): Issue the warning.
+	* tests/input.at (Cannot type action): Check the warning.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	warn about typed mid-rule actions in Yacc mode
+	* src/reader.c (grammar_current_rule_action_append): Warn.
+	* tests/input.at (AT_CHECK_UNUSED_VALUES): Check.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: check typed mid-rule actions
+	* tests/input.at (_AT_UNUSED_VALUES_DECLARATIONS): Check
+	typed mid-rule actions.
+	* tests/report.at (Reports): Check that types of typed mid-rule
+	actions are reported.
+	* tests/actions.at (Typed mid-rule actions): Check that
+	the values of typed mid-rule actions are correct.
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-08-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	add support for typed mid-rule actions
+	Prompted on Piotr Marcińczyk's message:
+	http://lists.gnu.org/archive/html/bug-bison/2017-06/msg00000.html.
+	See also http://lists.gnu.org/archive/html/bug-bison/2018-06/msg00001.html.
+
+	Because their type is unknown to Bison, the values of midrule actions are
+	not treated like the others: they don't have %printer and %destructor
+	support.  In addition, in C++, (Bison) variants cannot work properly.
+
+	Typed midrule actions address these issues.  Instead of:
+
+	    exp: { $<ival>$ = 1; } { $<ival>$ = 2; }   { $$ = $<ival>1 + $<ival>2; }
+
+	write:
+
+	    exp: <ival>{ $$ = 1; } <ival>{ $$ = 2; }   { $$ = $1 + $2; }
+
+	* src/scan-code.h, src/scan-code.l (code_props): Add a `type` field to
+	record the declared type of an action.
+	(code_props_rule_action_init): Add a type argument.
+	* src/parse-gram.y: Accept an optional type tag for actions.
+	* src/reader.h, src/reader.c (grammar_current_rule_action_append): Add
+	a type argument.
+	(grammar_midrule_action): When a mid-rule is typed, pass its type to
+	the defined dummy non terminal symbol.
+
+2018-08-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: make room for more cases
+	* tests/input.at (AT_CHECK_UNUSED_VALUES): Add an empty line
+	to allow more symbols, and adjust line numbers.
+	Use a more consistent m4 quoting scheme.
+
+2018-08-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	warnings: address -Wnull-dereference in reader.c
+	Based on a patch by David Michael.
+	http://lists.gnu.org/archive/html/bison-patches/2018-07/msg00000.html
+
+	* src/reader.c (find_start): New, extracted from...
+	(check_and_convert_grammar): here.
+
+2018-08-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: ielr: reduce scopes
+	* src/ielr.c: Use modern C to reduce the scopes of some variables.
+
+2018-07-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: move to C99 to reduce scopes
+	* src/symtab.c, src/reader.c: Freely mix statements and variable
+	definitions.  And use for-loops with initializers.
+
+2018-07-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: split a function in two
+	grammar_current_rule_action_append was used in two different places:
+	for actual action (`{...}`), and for predicates (`%?{...}`).  Let's
+	split this in two different functions.
+
+	* src/reader.h, src/reader.c (grammar_current_rule_predicate_append): New.
+	Extracted from...
+	(grammar_current_rule_action_append): here.
+	Remove arguments that don't apply.
+	Adjust dependencies.
+
+2018-07-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix typo
+	* tests/actions.at: Remove (harmless) stray character.
+
+2018-07-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	print: remove unused function
+	This function was unused since 1991's original import by
+	rms (e06f0c34427faedc7afbec9554adbffc4c87312e).
+
+	* src/print.c (print_token): Remove.
+
+2018-06-23  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: fix Texinfo syntax error
+	* doc/bison.texi (Understanding): here.
+
+2018-06-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: we now show the type of the symbols
+	* doc/bison.texi (Understanding Your Parser): Update the output
+	from Bison.
+	Use types in the example, and show them in the report.
+	* NEWS: Update.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: check the typed symbols in the reports
+	* tests/report.at: New.
+	* tests/local.mk, tests/testsuite.at: Use it.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	report: display the type of the symbols
+	* src/print.c (print_nonterminal_symbols, print_terminal_symbols):
+	Also should the type of the symbols.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/print.c (print_terminal_symbols, print_nonterminal_symbols): Here.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: split large function
+	* src/print.c (print_grammar): Split into...
+	(print_terminal_symbols, print_nonterminal_symbols): these.
+	Adjust dependencies.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/print.c (print_grammar): Shorten scopes.
+
+2018-06-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+	Fixes the `make install-pdf` problem reported by Hans Åberg in
+	http://lists.gnu.org/archive/html/bug-bison/2018-06/msg00000.html
+	that had already been fixed by Joel E. Denny in
+	http://lists.gnu.org/archive/html/bug-bison/2012-04/msg00011.html
+	Final fix in
+	http://lists.gnu.org/archive/html/bug-gnulib/2018-06/msg00019.html
+
+2018-06-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	Merge maint into master
+	* upstream/maint: (48 commits)
+	  THANKS: update an address
+	  tests: adjust syncline tests to GCC 7
+	  glr: fix improperly placed synclines
+	  bison: be git grep friendly
+	  Replace ftp with https
+	  maint: post-release administrivia
+	  version 3.0.5
+	  bison: style: indentation fixes
+	  regen
+	  bison: please address sanitizer
+	  C++: style: fix indentation
+	  NEWS: update
+	  C++: style: prefer `unsigned` to `unsigned int`
+	  C++: style: space before paren
+	  C++: fix -Wdeprecated warnings
+	  tests: fix -Wdeprecated warning
+	  maint: update syntax-check exclusions
+	  autoconf: update
+	  regen
+	  Update copyright years
+	  ...
+
+2018-05-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	THANKS: update an address
+
+2018-05-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: adjust syncline tests to GCC 7
+	GCC 7 also underlines the error.
+
+	    syncline.c:4:2: error: #error "4"
+	     #error "4"
+	      ^~~~~
+
+	* tests/synclines.at (_AT_SYNCLINES_COMPILE): Remove tildas from GCC 7.
+
+2018-05-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr: fix improperly placed synclines
+	Predicates with GLR are issued with synclines in the middle of C code:
+
+	          case 2:
+	      if (! (#line 6 "sempred.y" /* glr.c:816  */
+	      new_syntax)) YYERROR;
+	    #line 793 "sempred.tab.c" /* glr.c:816  */
+	      break;
+
+	Reported by Rici Lake.
+	http://lists.gnu.org/archive/html/bug-bison/2018-05/msg00033.html
+
+	* data/c.m4 (b4_predicate_case): Be sure to start on column 0.
+	It would be nicer if b4_syncline could ensure this by itself
+	(that would avoid ugly code when synclines are disabled), but that's
+	way more work.
+	* tests/glr-regression.at (Predicates): Be a real end-to-end test.
+	This would have caught this error years ago...
+
+2018-05-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	bison: be git grep friendly
+	* src/output.c (user_actions_output): Make calls to b4_case and
+	b4_predicate_case explicit.
+
+2018-05-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	Replace ftp with https
+	Reported by Hans Åberg.
+
+	* README, cfg.mk, doc/bison.texi: here.
+
+2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2018-05-27  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.0.5
@@ -371,6 +1240,22 @@
 
 2015-01-23  Akim Demaille  <akim@lrde.epita.fr>
 
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint:
+	  maint: post-release administrivia
+	  version 3.0.4
+	  gnulib: update
+	  build: re-enable compiler warnings, and fix them
+	  tests: c++: fix a C++03 conformance issue
+	  tests: fix a title
+	  c++: reserve 200 slots in the parser's stack
+	  tests: be more robust to unrecognized synclines, and try to recognize xlc
+	  tests: fix C++ conformance
+	  build: fix some warnings
+	  build: avoid infinite recursions on include_next
+
+2015-01-23  Akim Demaille  <akim@lrde.epita.fr>
+
 	maint: post-release administrivia
 	* NEWS: Add header line for next release.
 	* .prev-version: Record previous version.
@@ -494,6 +1379,17 @@
 
 2015-01-16  Akim Demaille  <akim@lrde.epita.fr>
 
+	Merge remote-tracking branch 'origin/maint' into origin/master
+	* origin/maint:
+	  doc: minor fixes
+	  gnulib: strtoul is considered obsolete and now useless
+	  c++: avoid warnings when destructors don't use $$
+	  maint: post-release administrivia
+	  version 3.0.3
+	  gnulib: update
+
+2015-01-16  Akim Demaille  <akim@lrde.epita.fr>
+
 	build: avoid infinite recursions on include_next
 	On MacOS X 10.5 PPC with Apple's GCC 4.0.1:
 
@@ -564,6 +1460,143 @@
 2015-01-15  Akim Demaille  <akim@lrde.epita.fr>
 
 	gnulib: update
+
+2015-01-14  Akim Demaille  <akim@lrde.epita.fr>
+
+	symbol: use the first occurrence as an LHS as defining location
+	Currently on the following grammar:
+
+	    %type <foo> foo
+	    %%
+	    start: foo | bar | "baz"
+	    foo: foo
+	    bar: bar
+
+	bison reports:
+
+	    warning: 2 nonterminals useless in grammar [-Wother]
+	    warning: 4 rules useless in grammar [-Wother]
+	    1.13-15: warning: nonterminal useless in grammar: foo [-Wother]
+	     %type <foo> foo
+	                 ^^^
+	    3.14-16: warning: nonterminal useless in grammar: bar [-Wother]
+	     start: foo | bar | "baz"
+	                  ^^^
+	    [...]
+
+	i.e., the location of the first occurrence of a symbol is taken as its
+	definition point.  In the case of nonterminals, the first occurrence
+	as a left-hand side of a rule makes more sense:
+
+	    warning: 2 nonterminals useless in grammar [-Wother]
+	    warning: 4 rules useless in grammar [-Wother]
+	    4.1-3: warning: nonterminal useless in grammar: foo [-Wother]
+	     foo: foo
+	     ^^^
+	    5.1-3: warning: nonterminal useless in grammar: bar [-Wother]
+	     bar: bar
+	     ^^^
+	    [...]
+
+	* src/symtab.h, src/symtab.c (symbol::location_of_lhs): New.
+	(symbol_location_as_lhs_set): New.
+	* src/parse-gram.y (current_lhs): Use it.
+	* tests/reduce.at: Update locations.
+
+2015-01-14  Akim Demaille  <akim@lrde.epita.fr>
+
+	reduce: don't complain about rules whose lhs is useless
+	In the following grammar, the 'exp' nonterminal is trivially useless.
+	So, of course, its rules are useless too.
+
+	    %%
+	    input: '0' | exp
+	    exp: exp '+' exp | exp '-' exp | '(' exp ')'
+
+	Previously all the useless rules were reported, including those whose
+	left-hand side is the 'exp' nonterminal:
+
+	    warning: 1 nonterminal useless in grammar [-Wother]
+	    warning: 4 rules useless in grammar [-Wother]
+	    2.14-16: warning: nonterminal useless in grammar: exp [-Wother]
+	     input: '0' | exp
+	                  ^^^
+	    2.14-16: warning: rule useless in grammar [-Wother]
+	     input: '0' | exp
+	                  ^^^
+	  ! 3.6-16: warning: rule useless in grammar [-Wother]
+	  !  exp: exp '+' exp | exp '-' exp | '(' exp ')'
+	  !       ^^^^^^^^^^^
+	  ! 3.20-30: warning: rule useless in grammar [-Wother]
+	  !  exp: exp '+' exp | exp '-' exp | '(' exp ')'
+	  !                     ^^^^^^^^^^^
+	  ! 3.34-44: warning: rule useless in grammar [-Wother]
+	  !  exp: exp '+' exp | exp '-' exp | '(' exp ')'
+	  !                                   ^^^^^^^^^^^
+
+	The interest of being so verbose is dubious.  I suspect most of the
+	time nonterminals are not expected to be useless, so the user wants to
+	fix the nonterminal, not remove its rules.  And even if the user
+	wanted to get rid of its rules, the position of these rules probably
+	does not help more that just having the name of the nonterminal.
+
+	This commit discard these messages, marked with '!', and keep the
+	others.  In particular, we still report:
+
+	    2.14-16: warning: rule useless in grammar [-Wother]
+	     input: '0' | exp
+	                  ^^^
+
+	All the useless rules (including the '!' ones) are still reported in
+	the reports (xml, text, etc.); only the diagnostics on stderr change.
+
+	* src/gram.c (grammar_rules_useless_report): Don't complain about
+	useless rules whose lhs is useless.
+	* src/reduce.h, src/reduce.c (reduce_nonterminal_useless_in_grammar):
+	Take a sym_content as argument.
+	Adjust callers.
+	* tests/reduce.at (Useless Rules, Underivable Rules, Reduced Automaton):
+	Adjust.
+
+2015-01-14  Akim Demaille  <akim@lrde.epita.fr>
+
+	style: reduce: use unsigned to count a number of objects
+	* src/reduce.h, src/reduce.c (nuseful_productions, nuseless_productions)
+	(nuseful_nonterminals, nuseless_nonterminals): Declare as unsigned.
+	Simplify "0 <" tests into non-zero tests.
+
+2015-01-14  Akim Demaille  <akim@lrde.epita.fr>
+
+	style: reduce: introduce and use a swap for bitset
+	* src/reduce.c (bitset_swap): New.
+	Use it.
+
+2015-01-14  Akim Demaille  <akim@lrde.epita.fr>
+
+	style: reduce: reduce scopes and other stylistic changes
+	* src/reduce.c: Various stylistic changes:
+	Reduce scopes.
+	Prefer ++i to i++.
+	Prefer < to >.
+
+2015-01-13  Akim Demaille  <akim@lrde.epita.fr>
+
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint:
+	  tests: split a large test case into several smaller ones
+	  package: a bit of trouble shooting indications
+	  doc: liby's main arms the internationalization
+	  bison: avoid warnings from static code analysis
+	  c++: fix the use of destructors when variants are enabled
+	  style: tests: simplify the handling of some C++ tests
+	  c++: symbols can be empty, so use it
+	  c++: variants: don't leak the lookahead in error recovery
+	  c++: provide a means to clear symbols
+	  c++: clean up the handling of empty symbols
+	  c++: comment and style changes
+	  c++: variants: comparing addresses of typeid.name() is undefined
+	  c++: locations: complete the API and fix comments
+	  build: do not clean figure sources in make clean
 
 2015-01-13  Akim Demaille  <akim@lrde.epita.fr>
 
@@ -709,6 +1742,23 @@
 
 	* doc/local.mk (CLEANDIRS): Replace with...
 	(CLEANFILES): this safer list of files to clean.
+
+2015-01-05  Akim Demaille  <akim@lrde.epita.fr>
+
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint:
+	  build: don't try to generate docs when cross-compiling
+	  package: fix a reporter's name
+	  %union: fix the support for named %union
+	  package: bump to 2015
+	  flex: don't trust YY_USER_INIT
+	  yacc.c: fix broken union when api.value.type=union and %defines are used
+	  doc: fix missing xref
+	  gnulib: update
+	  location: remove some ugly debugging code traces
+	  build: use abort to pacify compiler errors
+	  package: bump to 2014
+	  doc: specify documentation encoding
 
 2015-01-05  Akim Demaille  <akim@lrde.epita.fr>
 
@@ -878,6 +1928,62 @@
 	to contain UTF-8 quotes and the like, which should be OK nowadays.
 	Add @documentlanguage while we're at it.
 
+2013-12-10  Akim Demaille  <akim@lrde.epita.fr>
+
+	symbols: properly fuse the properties of two symbol aliases
+	This completes and fixes a7280757105b2909f6a58fdd1c582de8e278319a.
+	Reported by Valentin Tolmer.
+
+	Before it Bison used to put the properties of the symbols
+	(associativity, printer, etc.) in the 'symbol' structure.  An
+	identifier-named token (FOO) and its string-named alias ("foo")
+	duplicated these properties, and symbol_check_alias_consistency()
+	checked that both had compatible properties and fused them, at the end
+	of the parsing of the grammar.
+
+	The commit a7280757105b2909f6a58fdd1c582de8e278319a introduces a
+	sym_content structure that keeps all these properties, and ensures
+	that both aliases point to the same sym_content (instead of
+	duplicating).  However, it removed symbol_check_alias_consistency,
+	which resulted in the non-fusion of *existing* properties:
+
+	  %token FOO "foo"
+	  %left FOO %left "foo"
+
+	was properly diagnosed as a redeclaration, but
+
+	  %left FOO %left "foo"
+	  %token FOO "foo"
+
+	was not, as the properties of FOO and "foo" were not checked before
+	fusion.  It certainly also means that
+
+	  %left "foo"
+	  %token FOO "foo"
+
+	did not transfer properly the associativity to FOO.
+
+	The fix is simple: reintroduce symbol_check_alias_consistency (under a
+	better name, symbol_merge_properties) and call it where appropriate.
+
+	Also, that commit made USER_NUMBER_HAS_STRING_ALIAS useless, but left
+	it.
+
+	* src/symtab.h (USER_NUMBER_HAS_STRING_ALIAS): Remove, unused.
+	Adjust dependencies.
+	* src/symtab.c (symbol_merge_properties): New, based on the former
+	symbol_check_alias_consistency.
+	* tests/input.at: Re-enable tests that we now pass.
+
+2013-12-10  Akim Demaille  <akim@lrde.epita.fr>
+
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint:
+	  package: install the examples
+	  package: install README and the like in docdir
+	  diagnostics: fix the order of multiple declarations reports
+	  symbol: provide an easy means to compare them in source order
+
 2013-12-09  Akim Demaille  <akim@lrde.epita.fr>
 
 	package: install the examples
@@ -922,6 +2028,32 @@
 	symbol: provide an easy means to compare them in source order
 	* src/symtab.c (symbols_sort): New.
 	(user_token_number_redeclaration): Taken from here.
+
+2013-12-09  Akim Demaille  <akim@lrde.epita.fr>
+
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint: (43 commits)
+	  maint: post-release administrivia
+	  version 3.0.2
+	  gnulib: update
+	  output: do not generate source files when late errors are caught
+	  output: record what generated files are source or report files
+	  output: do not generate source files when early errors are caught
+	  xml: also use "%empty" with html output
+	  style: formatting changes
+	  xml: also display %empty for empty right-hand sides
+	  reports: display %empty in the generated pointed-rules
+	  news: YYERROR vs variants
+	  style: scope reduction in lalr.cc
+	  lalr1.cc: formatting changes
+	  lalr1.cc: fix the support of YYERROR with variants
+	  tests: check $$'s destruction with variant, YYERROR, and no error recovery
+	  tests: simplify useless obfuscation
+	  skeletons: use better names when computing a "goto"
+	  maint: post-release administrivia
+	  version 3.0.1
+	  aver: it is no longer "protected against NDEBUG"
+	  ...
 
 2013-12-05  Akim Demaille  <akim@lrde.epita.fr>
 
@@ -1296,6 +2428,36 @@
 
 2013-09-19  Akim Demaille  <akim@lrde.epita.fr>
 
+	Merge remote-tracking branch 'origin/maint'
+	* origin/maint:
+	  glr: more assertions
+	  glr: shorten scopes
+	  glr: formatting changes
+	  glr: better use of tracing macros
+	  examples: improve the output of the "variant" example
+	  variant: remove useless assertion
+	  tests: remove stray debugging traces
+	  tests: do not use grep -q
+	  build: don't require flex for ordinary builds
+	  maint: update .gitignore
+	  build: port to pre-5.8.7 perl
+	  tests: minor change to make it easier to test other skeletons
+	  uniqstr: fix assertion
+
+2013-09-19  Akim Demaille  <akim@lrde.epita.fr>
+
+	glr: simplify the invocation of YYLLOC_DEFAULT
+	The commit which introduces yyresolveLocations (commit
+	8710fc41aaebc5d167a2783a4b8b60849a803869) saves and restores the
+	look-ahead (type, value and location) for no clear reason.  This
+	appears to be useless.
+
+	* data/glr.c (yyresolveLocations): Don't save/restore the current
+	look-ahead to call YYLLOC_DEFAULT.
+	Minor style changes.
+
+2013-09-19  Akim Demaille  <akim@lrde.epita.fr>
+
 	glr: more assertions
 	* data/glr.c (yyaddDeferredAction, yyglrShiftDefer, yypdumpstack):
 	More assertions.
@@ -1376,6 +2538,24 @@
 	uniqstr: fix assertion
 	* src/uniqstr.c (uniqstr_assert): Really make sure str is a uniqstr,
 	not just whether some uniqstr with the same content was registered.
+
+2013-08-01  Valentin Tolmer  <nitnelave1@gmail.com>
+
+	symbols: improve symbol aliasing
+	Rather than having duplicate info in the symbol and the alias that has
+	to be resolved later on, both the symbol and the alias have a common
+	pointer to a separate structure containing this info.
+
+	* src/symtab.h (sym_content): New structure.
+	* src/symtab.c (sym_content_new, sym_content_free, symbol_free): New
+
+	* src/AnnotationList.c, src/conflicts.c, src/gram.c, src/gram.h,
+	* src/graphviz.c, src/ielr.c, src/output.c, src/parse-gram.y, src/print.c
+	* src/print-xml.c, src/print_graph.c, src/reader.c, src/reduce.c,
+	* src/state.h, src/symlist.c, src/symtab.c, src/symtab.h, src/tables.c:
+	Adjust.
+
+	* tests/input.at: Fix expectations (order changes).
 
 2013-08-01  Akim Demaille  <akim@lrde.epita.fr>
 
