@@ -1,5 +1,12 @@
 GNU Bison NEWS
 
+* Noteworthy changes in release 3.2.1 (2018-11-09) [stable]
+
+** Bug fixes
+
+  Several portability issues have been fixed in the build system, in the
+  test suite, and in the generated parsers in C++.
+
 * Noteworthy changes in release 3.2 (2018-10-29) [stable]
 
 ** Backward incompatible changes

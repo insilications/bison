@@ -1,3 +1,235 @@
+2018-11-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.1
+	* NEWS: Record release date.
+
+2018-11-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: fix issues in the generated tarball
+	Reported by Andre da Costa Barros.
+	https://savannah.gnu.org/patch/?9716
+
+	* examples/calc++/local.mk: We no longer generate position.hh and
+	stack.hh.  Leaving them here triggers their concurrent generation,
+	which fails.
+	(%C%_calc___CPPFLAGS): Fix the extracted headers in the source tree.
+	* examples/mfcalc/local.mk (%C%_mfcalc_CPPFLAGS): Ditto.
+
+2018-11-07  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: fix typo
+	Reported by Horst Von Brand.
+	https://savannah.gnu.org/support/?109580
+
+	* examples/local.mk (.PHOMY): Rename as...
+	(.PHONY): this.
+
+2018-11-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-11-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: ship them
+	Currently, the examples are extracted on the user's side.
+	Unfortunately, that requires that the user has Perl, which is
+	otherwise not needed for Bison.  Let's ship the examples instead.
+
+	The examples were handled this way so that we could depend on
+	configure flags: if --enable-gcc-warnings is passed, it is understood
+	as "I'm a maintainer", so the examples are generated with `#line`s.
+	Regular users should not see them, so they are now unconditionally
+	removed when rolling a tarball.
+
+	Reported by Mike Frysinger.
+	https://lists.gnu.org/archive/html/bison-patches/2015-04/msg00000.html
+
+	* examples/local.mk: Ship all the extracted files.
+	(examples-unline): New.
+	Make sure that the generated tarballs do not contain the #lines.
+
+2018-11-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: minor fixes in doc/
+	* doc/local.mk: Consistently use *.tmp for temporary files.
+	Fix comments.
+
+2018-11-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: maximize chances of errors sooner
+	* .travis.yml: Try clang and icc soon, so that we don't have to wait
+	for the end of the run to know that they fail.
+
+2018-11-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: improve the generated documentation
+	* data/lalr1.cc, data/location.cc: Improve documenting comments.
+	* tests/c++.at (Doxygen Documentation): Fix AT_BISON_OPTION_PUSHDEFS,
+	so that the generated yyerror is correct.
+	* tests/c++.at, tests/headers.at: Prefer %empty.
+
+2018-11-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: don't fail if the C++ compiler does not work
+	Also, make sure that `make dist` generates a correct tarball even if
+	the C++ compiler does not work.
+
+	Reported by Nelson H. F. Beebe.
+
+	* m4/cxx.m4 (BISON_CXX_WORKS): Define to true/false instead of
+	true/exit 77.  The latter is too dangerous to use (it directly quits).
+	(ENABLE_CXX): New name for the Automake conditional, for consistency
+	with ENABLE_CXX11 etc.
+	* tests/local.at (AT_COMPILE, AT_COMPILE_CXX): Adjust to the new
+	semantics of BISON_CXX_WORKS.
+	* examples/c++/local.mk: Skip the variant test if C++ does not work.
+	* examples/calc++/local.mk: Likewise.
+
+2018-11-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: don't disable C++ warnings in C files
+	This triggers error with GCC.
+	See eff6739124c61bb5660d78453210d1d6a17d30e7.
+
+	* tests/testsuite.h: Disable -Wzero-as-null-pointer-constant only for
+	C++.
+
+2018-11-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: workaround portability issue
+	On some systems (x86_64-pc-solaris2.11), with Developer Studio 12.5's
+	CC, we get:
+
+	    ".../include/CC/Cstd/vector.cc", line 127: Error: Cannot assign const yy::parser::stack_symbol_type to yy::parser::stack_symbol_type without "yy::parser::stack_symbol_type::operator=(const yy::parser::stack_symbol_type&)";.
+	    ".../include/CC/Cstd/vector", line 475:     Where: While instantiating "std::vector<yy::parser::stack_symbol_type>::__insert_aux(yy::parser::stack_symbol_type*, const yy::parser::stack_symbol_type&)".
+	    ".../include/CC/Cstd/vector", line 475:     Where: Instantiated from non-template code.
+	    1 Error(s) detected.
+
+	Don't expect __cplusplus to be always defined.  If it's not, consider
+	this is C++98.
+
+	Reported by Nelson H. F. Beebe.
+
+	* data/c++.m4, data/lalr1.cc, examples/c++/variant.yy, tests/local.at,
+	* tests/testsuite.h:
+	An undefined __cplusplus means pre C++11.
+
+2018-11-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: work around getopt portability issues
+	On some systems, we don't use our getopt.  As a consequence the error
+	messages vary:
+
+	    $ bison --skeleton
+	    bison: option requires an argument -- skeleton
+	    Try 'bison --help' for more information.
+
+	instead of
+
+	    bison: option '--skeleton' requires an argument
+	    Try 'bison --help' for more information.
+
+	Reported by Jannick and Nelson H. F. Beebe.
+	https://lists.gnu.org/archive/html/bison-patches/2018-10/msg00140.html
+
+	* tests/input.at (Invalid number of arguments): work around getopt
+	portability issues.
+
+2018-11-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: -Wzero-as-null-pointer-constant was added to GCC 4.7
+	It is not supported by previous versions.
+	See https://www.gnu.org/software/gcc/gcc-4.7/changes.html
+	Reported by Nelson H. F. Beebe.
+
+	* doc/bison.texi (Calc++ Scanner): here.
+
+2018-11-02  Adam Sampson  <ats@offog.org>
+
+	examples: #include <cstring> in calc++
+	strerror is defined by <string.h>, and recent versions of GNU libstdc++
+	no longer include this automatically from <string>.
+
+2018-10-31  Akim Demaille  <akim.demaille@gmail.com>
+
+	c: provide a definition of _Noreturn that works for C++
+	On Solaris, GCC 7.3 defines:
+
+	                      -std=c++14  -std=c++17
+	    __cplusplus       201402L       201703L
+	    __STDC_VERSION__  199901L       201112L
+
+	So the current #definition of _Noreturn sees that 201112 <=
+	__STDC_VERSION__, i.e., that C11 is supported, so it expects _Noreturn
+	to be supported.  Apparently it is not.
+
+	This is only for C++, the test suite works for C.  However, the test
+	suite does not try several C standards, maybe we should...
+
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00064.html
+
+	* data/c.m4 (b4_attribute_define): Define _Noreturn as [[noreturn]] in
+	modern C++.
+
+2018-10-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	c: update the definition of _Noreturn
+	Does not work on Solaris 11.3 x86/64:
+
+	    479. c++.at:1293: testing C++ GLR parser identifier shadowing ...
+	    ======== Testing with C++ standard flags: '-std=c++17'
+	    ./c++.at:1332: $BISON_CXX_WORKS
+	    stderr:
+	    stdout:
+	    ./c++.at:1332: $CXX $CXXFLAGS $CPPFLAGS  $LDFLAGS -o input input.cc $LIBS
+	    stderr:
+	    input.cc:837:8: error: '_Noreturn' does not name a type
+	     static _Noreturn void
+	            ^~~~~~~~~
+	    input.cc:845:8: error: '_Noreturn' does not name a type
+	     static _Noreturn void
+	            ^~~~~~~~~
+
+	Reported by Kiyoshi Kanazawa.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00051.html
+
+	* data/c.m4 (b4_attribute_define): Use the snippet which is currently
+	in gnulib's m4/gnulib-common.m4 (which seems a little more advanced
+	than lib/_Noreturn.h).
+
+2018-10-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: don't expect the shell to support 'local'
+	It doesn't work on Solaris 11.3 x86/64.
+	Reported by Kiyoshi Kanazawa.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00051.html
+
+	* examples/test: Don't use 'local'.
+
+2018-10-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	bitset: fix warning
+	Reported by Hans Åberg.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00047.html
+
+	* lib/bitset.c (bitset_count_): here.
+
+2018-10-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	build: fix use of gnulib Make variables
+	Reported by Kiyoshi Kanazawa.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00048.html
+
+	* lib/local.mk (lib_libbison_a_LIBADD): Merge into...
+	* src/local.mk (src_bison_LDADD): here.
+
+2018-10-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2018-10-29  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.2
