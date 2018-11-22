@@ -107,6 +107,7 @@ ruby
 sharutils
 sof-crosstool-ng
 sof-newlib-xtensa
+solid
 source-highlight
 sudo
 swig

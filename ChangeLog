@@ -1,3 +1,109 @@
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.2
+	* NEWS: Record release date.
+
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: remove useless includes
+	* examples/c++/variant-11.yy, examples/c++/variant.yy: here.
+	Fix warning when storing a long into an int.
+
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: using macros around user types breaks when they include comma
+	We may generate code such as
+
+	    basic_symbol (typename Base::kind_type t, YY_RVREF (std::pair<int,int>) v);
+
+	which, of course, breaks, because YY_RVREF sees two arguments.  Let's
+	not play tricks with _VA_ARGS__, I'm unsure about it portability.
+	Anyway, I plan to change more things in this area.
+
+	Reported by Sébastien Villemot.
+	http://lists.gnu.org/archive/html/bug-bison/2018-11/msg00014.html
+
+	* data/variant.hh (b4_basic_symbol_constructor_declare)
+	(b4_basic_symbol_constructor_define): Don't use macro on user types.
+	* tests/types.at: Check that we support pairs.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.c: fix use of _Noreturn
+	In C++, [[noreturn]] must not be between "static" and the rest of the
+	function signature, it must precede it.  C's _Noreturn does not seem
+	to have such a constraint, but it is therefore compatible with the C++
+	constraint.  Since we #define _Noreturn as [[noreturn]] is modern C++,
+	be sure to push the _Noreturn first.
+
+	Unfortunately this was not caught by the test suite, because it always
+	loads config.h first, and config.h contains another definition of
+	_Noreturn that does not use [[noreturn]], and hides ours.  That's
+	probably a sign we should avoid always loading config.h.
+
+	* data/glr.c (yyFail, yyMemoryExhausted): here.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: run the api.value.type tests for all C++ standards
+	* tests/local.at (AT_LANG_FOR_EACH_STD): New.
+	(AT_REQUIRE_CXX_VERSION): Rename as...
+	(AT_REQUIRE_CXX_STD): this.
+	Accept an argument for what to do when the requirement is not met.
+	* tests/types.at (api.value.type): Check all the C++ stds.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: split the ASAN job in two
+	The following commit introduce even more compilations/runs than
+	before, and with ASAN on, we go beyond to 50min credit from Travis.
+
+	* .travis.yml (Clang 7 libc++ and ASAN): Split in two.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: use YY_CPLUSPLUS
+	* data/c++.m4: here.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: factor the handling of __cplusplus into YY_CPLUSPLUS
+	* data/c++.m4 (b4_cxx_portability): Define it.
+	Use it.
+	* data/lalr1.cc, data/variant.hh: Use it.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: compile the C++ examples with warnings
+	* examples/c++/local.mk: Pass $(WARN_CXXFLAGS_TEST).
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix syncline tests
+	These tests are skipped with GCC:
+
+	    "\"".c:1:5: error: function declaration isn't a prototype [-Werror=strict-prototypes]
+	     int main() { return 0; }
+	         ^~~~
+
+	* tests/synclines.at: Stop writing C++ in C.
+	* tests/local.at: Formatting changes.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2018-11-09  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.2.1

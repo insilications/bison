@@ -5,6 +5,7 @@ Configure miss: microuptime
 Configure miss: nanouptime
 Configure miss: whether printf supports the 'n' directive
 Configure miss: arithmetic hrtime_t
+Configure miss: 32-bit host C ABI
 Configure miss: strerror_r with POSIX signature
 Configure miss: whether C symbols are prefixed with underscore at the linker level
 Configure miss: whether gethrtime is declared
