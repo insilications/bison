@@ -1,3 +1,29 @@
+2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.3
+	* NEWS: Record release date.
+
+2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: fix token constructors for types with commas
+	Bitten by macros, again.
+	See 680b715518795c8648360fcf05f3772c04d2eed2.
+
+	* data/variant.hh (_b4_symbol_constructor_declare)
+	(_b4_symbol_constructor_define): Do not use user types, which can
+	include commas as in `std::pair<int, int>`, to macros.
+
+	* tests/local.at: Adjust the lex related macros to support the
+	case of token constructors.
+	* tests/types.at: Also check token constructors on types with commas.
+
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.2.2

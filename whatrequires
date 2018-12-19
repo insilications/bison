@@ -16,6 +16,7 @@ bro
 cgdb
 clamav
 comedilib
+compat-mariadb-soname18
 conntrack-tools
 cpio
 cscope
@@ -75,6 +76,7 @@ linux-hyperv
 linux-hyperv-lts
 linux-hyperv-mini
 linux-kata
+linux-libc-headers
 linux-lts
 linux-oracle
 linux-pk414
@@ -91,6 +93,7 @@ octave
 opensm
 ostree
 otp
+pdns
 perl
 php
 postgresql
@@ -107,7 +110,6 @@ ruby
 sharutils
 sof-crosstool-ng
 sof-newlib-xtensa
-solid
 source-highlight
 sudo
 swig
