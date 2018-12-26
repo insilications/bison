@@ -1,5 +1,6 @@
 # This file contains recursive sources that require this package
 OpenSP
+QGIS
 R
 acpica-unix2
 at
@@ -42,13 +43,14 @@ gnutls
 go
 gobject-introspection
 graphviz
+grass
 groff
 grub
 gstreamer
 gutenprint
 hunspell
+igt-gpu-tools
 indent
-intel-gpu-tools
 iproute2
 iptables
 jq

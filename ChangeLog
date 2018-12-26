@@ -1,3 +1,56 @@
+2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.4
+	* NEWS: Record release date.
+
+2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: also provide a copy constructor for symbol_type
+	Suggested by Wolfgang Thaller.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00081.html
+
+	* data/c++.m4 (basic_symbol, by_type): Instead of provide either move
+	or copy constructor, always provide the copy one.
+	* tests/c++.at (C++ Variant-based Symbols Unit Tests): Check it.
+
+2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: fix double free when a symbol_type was moved
+	Currently the following piece of code crashes (with parse.assert),
+	because we don't record that s was moved-from, and we invoke its dtor.
+
+	    {
+	      auto s = parser::make_INT (42);
+	      auto s2 = std::move (s);
+	    }
+
+	Reported by Wolfgang Thaller.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00077.html
+
+	* data/c++.m4 (by_type): Provide a move-ctor.
+	(basic_symbol): Be sure not to read a moved-from value.
+	* tests/c++.at (C++ Variant-based Symbols Unit Tests): Check this case.
+
+2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: style: improve tests
+	* tests/c++.at (C++ Variant-based Symbols Unit Tests): Provide better
+	assertions.
+	Use them.
+	Avoid useless Bison invocations.
+
+2018-12-23  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: style: use consistently this/that instead of this/other
+	* data/c++.m4: here.
+
+2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.2.3
