@@ -83,6 +83,7 @@ linux-lts
 linux-oracle
 linux-pk414
 linux-tools
+lm-sensors
 ltp
 mariadb
 mc
@@ -92,6 +93,7 @@ nftables
 ntp
 oath-toolkit
 octave
+openscad
 opensm
 ostree
 otp

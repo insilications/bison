@@ -1,19 +1,20 @@
 Configure miss: whether C++ compiler handles -Werror -Wunknown-warning-option
+Configure miss: dmd
+Configure miss: Java compiler
+Configure miss: Java virtual machine
 Configure miss: crtdefs.h
-Configure miss: __fseterr
 Configure miss: microuptime
 Configure miss: nanouptime
+Configure miss: __fseterr
 Configure miss: whether printf supports the 'n' directive
 Configure miss: arithmetic hrtime_t
-Configure miss: 32-bit host C ABI
 Configure miss: strerror_r with POSIX signature
 Configure miss: whether C symbols are prefixed with underscore at the linker level
+Configure miss: whether to activate relocatable installation
+Configure miss: 32-bit host C ABI
 Configure miss: whether gethrtime is declared
-Configure miss: whether pthread_rwlock_rdlock prefers a writer to a reader
 Configure miss: whether mbswidth is declared in <wchar.h>
 Configure miss: obstacks that work with any size object
 Configure miss: whether snprintf fully supports the 'n' directive
 Configure miss: if malloc debugging is wanted
 Configure miss: CFLocaleCopyPreferredLanguages
-Configure miss: Java compiler
-Configure miss: Java virtual machine

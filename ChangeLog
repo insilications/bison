@@ -1,7 +1,1115 @@
+2019-01-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.3.1
+	* NEWS: Record release date.
+
+2019-01-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	yacc: issue warnings, not errors, for Bison extensions
+	Reported by Kiyoshi Kanazawa.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00029.html
+
+	* src/getargs.c (getargs): Let --yacc imply -Wyacc, not -Werror=yacc.
+	* tests/input.at: Adjust.
+	* doc/bison.tex (Bison Options): Document.
+
+2019-01-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes in NEWS and complain.c
+
+2019-01-27  Kiyoshi Kanazawa  <yoi_no_myoujou@yahoo.co.jp>
+
+	tests: don't depend on the user's definition of SHELL
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00031.html
+
+	* examples/test (SHELL): Set it to /bin/sh.
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.3
+	* NEWS: Record release date.
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: fix comment
+	* data/skeletons/c++.m4: here.
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes
+	* data/skeletons/lalr1.cc: Add dnl.
+	* data/skeletons/bison.m4: Comment the use of dnl.
+
+2019-01-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: run the printer/destructor test on glr.cc
+	* tests/actions.at (_AT_CHECK_PRINTER_AND_DESTRUCTOR): Adjust for
+	glr.cc, and use it.
+
+2019-01-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2019-01-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	--update: when used, do not generate the output files
+	It is inconvenient that we also generate the output files when we
+	update the grammar file, and it's somewhat unexpected.  Let's not do
+	that.
+
+	* src/main.c (main): Skip generation when --update is passed.
+	* src/getargs.c (usage): Update the help message.
+	* doc/bison.texi (Bison Options): Likewise.
+	* tests/input.at: Check that we don't generate the output.
+
+2019-01-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: let redundant definitions be only warnings
+	After all, this is clearly harmless.
+
+	* src/muscle-tab.c (muscle_percent_define_insert): Let equal
+	definitions of a %define variable be only a warning.
+	Adjust test cases.
+
+2019-01-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: improve check for updated variable names
+	* tests/input.at ("%define" backward compatibility): Don't define
+	twice "api.namespace", so that we don't get an error, which stops the
+	process too soon to see an error about the value given to
+	'lr.keep-unreachable-state'.
+
+2019-01-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: remove redundancy
+	Don't repeat the name of the warning in the sub messages.  E.g.,
+	remove the second "[-Wother]" in the following message
+
+	    foo.y:2.1-27: warning: %define variable 'parse.error' redefined [-Wother]
+	     %define parse.error verbose
+	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+	    foo.y:1.1-27:     previous definition [-Wother]
+	     %define parse.error verbose
+	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	* src/complain.c (error_message): Don't print the warning type when
+	it's indented.
+	Adjust test cases.
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: better "scope" a workaround for GCC
+	* data/skeletons/lalr1.cc: Enable it only for GCC 4.8 and before.
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: address -Wweak-vtables warnings
+	Reported by Derek Clegg
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00021.html
+
+	    aux/parser-internal.h:429:12: error: 'syntax_error' has no out-of-line virtual
+	         method definitions; its vtable will be emitted in every translation unit
+	         [-Werror,-Wweak-vtables]
+	       struct syntax_error : std::runtime_error
+
+	To avoid this warning, we need syntax_error to have a virtual function
+	defined in a compilation unit.  Let it be the destructor.  To comply
+	with C++98, this dtor should be 'throw()'.  Merely making YY_NOEXCEPT
+	be 'throw()' in C++98 triggers
+	errors (http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00022.html),
+	so let's introduce YY_NOTHROW and flag only ~syntax_error with it.
+
+	Also, since we now have an explicit dtor, we need to provide an copy
+	ctor.
+
+	* configure.ac (warn_cxx): Add -Wweak-vtables.
+	* data/skeletons/c++.m4 (YY_NOTHROW): New.
+	(syntax_error): Declare the dtor, and define the copy ctor.
+	* data/skeletons/glr.cc, data/skeletons/lalr1.cc (~syntax_error):
+	Define.
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: prefer bool to char
+	* src/state.h, src/state.c (state::consistent): Make it a bool.
+	Adjust dependencies.
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.cc: be more alike lalr1.cc
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes
+	* data/skeletons/c++.m4: Un-remove an end-of-line.
+
+2019-01-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: fixes
+
+2019-01-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
+2019-01-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.91
+	* NEWS: Record release date.
+
+2019-01-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: various fixes
+	Some reported by syntax-check.
+
+	* po/POTFILES.in: Add fixits.cc.
+	* src/muscle-tab.c: Don't cast for free.
+	* src/files.c: Reduce scopes.
+	* cfg.mk: We need the cast for free in muscle_percent_define_insert.
+
+2019-01-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: document -ffixit and --update
+	* doc/bison.texi (Bison Options): here.
+
+2019-01-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: style fixes
+	* doc/bison.texi: Use @kbd where appropriate.
+	Update ^~~~ marks for caret-errors.
+	* build-aux/cross-options.pl: Do not add quotes to %define's argument.
+
+2019-01-18  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update for fixits and --update
+
+2019-01-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: handle duplicates of %name-prefix
+	The test case "Deprecated directives" (currently 56) no longer emits
+	warnings after 'bison -u'!
+
+	* src/files.h, src/files.c (spec_name_prefix_loc): New.
+	* src/parse-gram.y (handle_name_prefix): Emit fixits for duplicate
+	%name-prefix.
+	* tests/input.at (Deprecated directives): Adjust.
+
+2019-01-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2019-01-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: handle %file-prefix
+	* src/files.h, src/files.c (spec_file_prefix_loc): New.
+	* src/scan-gram.l (%file-prefix): Delegate diagnostics to...
+	* src/parse-gram.y (handle_file_prefix): here.
+	* src/complain.c (duplicate_directive): Quote the directive.
+	* tests/input.at: Adjust.
+
+2019-01-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: handle per-rule duplicates
+	* src/complain.c (duplicate_rule_directive): Here.
+	* tests/actions.at (Invalid uses of %empty): Check it.
+
+2019-01-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: fix warnings about duplicates
+	* src/complain.c (duplicate_directive): Fix the complaint level.
+	* tests/input.at: Adjust.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: properly indent the "previous declaration" message
+	* src/complain.c (duplicate_directive, duplicate_rule_directive):
+	Here.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: rename some functions for consistency
+	"handle_" is the prefix used in scan-code.l for instance.
+
+	* src/parse-gram.y (do_error_verbose, do_name_prefix, do_require)
+	(do_skeleton, do_yacc):
+	Rename as...
+	(handle_error_verbose, handle_name_prefix, handle_require)
+	(handle_skeleton, handle_yacc):
+	these.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: report duplicate %yacc directives
+	We should use -ffixit and --update to clean files with duplicate
+	directives.  And we should complain only once about duplicate obsolete
+	directives: keep only the "duplicate" warning.  Let's start with %yacc.
+
+	For instance on:
+
+	    %fixed-output_files
+	    %fixed-output-files
+	    %yacc
+	    %%
+	    exp:
+
+	This run of bison:
+
+	    $ bison /tmp/foo.y -u
+	    foo.y:1.1-19: warning: deprecated directive, use '%fixed-output-files' [-Wdeprecated]
+	     %fixed-output_files
+	     ^~~~~~~~~~~~~~~~~~~
+	    foo.y:2.1-19: warning: duplicate directive [-Wother]
+	     %fixed-output-files
+	     ^~~~~~~~~~~~~~~~~~~
+	    foo.y:1.1-19: previous declaration
+	     %fixed-output_files
+	     ^~~~~~~~~~~~~~~~~~~
+	    foo.y:3.1-5: warning: duplicate directive [-Wother]
+	     %yacc
+	     ^~~~~
+	    foo.y:1.1-19: previous declaration
+	     %fixed-output_files
+	     ^~~~~~~~~~~~~~~~~~~
+	    bison: file 'foo.y' was updated (backup: 'foo.y~')
+
+	gives:
+
+	    %fixed-output-files
+	    %%
+	    exp:
+
+	* src/location.h, src/location.c (location_empty): New.
+	* src/complain.h, src/complain.c (duplicate_directive): New.
+
+	* src/getargs.h, src/getargs.c (yacc_flag): Instead of a Boolean, be
+	the location of the definition.
+	Update dependencies.
+
+	* src/scan-gram.l (%yacc, %fixed-output-files): Move the handling of
+	its warnings to...
+	* src/parse-gram.y (do_yacc): This new function.
+
+	* tests/input.at (Deprecated Directives): Adjust expectations.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: rename duplicate_directive as duplicate_rule_directive
+	* src/complain.h, src/complain.c: here.
+	Adjust callers.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: suggest running --update if there are fixits
+	* src/fixits.h, src/fixits.c (fixits_empty): New.
+	* src/complain.c (deprecated_directive): Register the Wdeprecated
+	fixits only if -Wdeprecated was enabled, so that we don't apply
+	updates if the user didn't ask for them.
+	* src/main.c (main): If there were fixits, issue a warning suggesting
+	running with --update.
+	Free uniqstrs after the fixits, since the latter use the former.
+	* tests/headers.at, tests/input.at: Update expectations.
+
+2019-01-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	fixits: avoid generating empty lines
+	* src/fixits.c (fixits_run): If erase the content of a line, also
+	erase the following \n.
+	* tests/input.at (Deprecated directives): Update expectations.
+
+2019-01-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	configure: don't try to run C++ warnings on C
+	Reported by Derek Clegg.
+	https://lists.gnu.org/archive/html/bison-patches/2019-01/msg00066.html
+
+	* configure.ac: here.
+
+2019-01-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	c, c++: avoid implicit fall-throw
+	Reported by Derek Clegg.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00004.html
+
+	* configure.ac (warn_common): Add -Wimplicit-fallthrough.
+	This does trigger failures in the test suite.
+	* data/skeletons/glr.c, data/skeletons/lalr1.cc,
+	* data/skeletons/yacc.c, tests/c++.at:
+	Make fall-throws explicit.
+
+2019-01-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: avoid -Wundefined-func-template warnings from clang
+	Reported by Derek Clegg.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00006.html
+
+	Clang does not like this:
+
+	    template <typename D>
+	    struct basic_symbol : D
+	    {
+	      basic_symbol();
+	    };
+
+	    struct by_type {};
+
+	    struct symbol_type : basic_symbol<by_type>
+	    {
+	      symbol_type(){}
+	    };
+
+	It gives:
+
+	    $ clang++-mp-7.0 -Wundefined-func-template foo.cc -c
+	    foo.cc:11:3: warning: instantiation of function 'basic_symbol<by_type>::basic_symbol'
+	                 required here, but no definition is available [-Wundefined-func-template]
+	      symbol_type(){}
+	      ^
+	    foo.cc:4:3: note: forward declaration of template entity is here
+	      basic_symbol();
+	      ^
+	    foo.cc:11:3: note: add an explicit instantiation declaration to suppress this warning
+	                 if 'basic_symbol<by_type>::basic_symbol' is explicitly instantiated in
+	                 another translation unit
+	      symbol_type(){}
+	      ^
+	    1 warning generated.
+
+	The same applies for the basic_symbol's destructor and `clear()`.
+
+	* configure.ac (warn_cxx): Add -Wundefined-func-template.
+	This triggered one failure in the test suite:
+	* tests/headers.at (Sane headers): here, where we check that we can
+	compile the generated headers in other compilation units than the
+	parser's.
+	Add a variant type to make sure that basic_symbol and symbol_type are
+	properly generated in this case.
+	* data/skeletons/c++.m4 (basic_symbol): Inline the definitions of the
+	destructor and of `clear` in the class definition.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	Revert the last two commits
+	They should not have been pushed, sorry about that.
+
+	This reverts
+	- commit 8575bd06ae6e65f3a30b21a3e022a968e4c7ae7a.
+	- commit 55bf52860eac5c1394dc344a691220272df32b09.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: avoid warnings about extraneous semi-colons
+	Reported by Derek Clegg.
+
+	* configure.ac (warn_common): Add -Wextra-semi.
+	* data/skeletons/c++.m4: Remove extraneous semi-colon.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	WIP
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: add fixit support for duplicate removal
+	* src/muscle-tab.c (muscle_percent_define_insert): Register a fixit
+	for duplicate removal.
+	* tests/input.at: Adjust expectations.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: improve the accuracy for %error-verbose
+	Avoid duplicate warnings about %error-verbose, once for deprecation,
+	another for duplicate.  Keep only the duplicate warning for the second
+	occurrence of %error-verbose.
+
+	This will help removal fixits.
+
+	* src/scan-gram.l (%error-verbose): Return as a PERCENT_ERROR_VERBOSE
+	token.
+	* src/parse-gram.y (do_error_verbose): New.
+	Use it.
+	* src/muscle-tab.c (muscle_percent_variable_update): Handle pseudo
+	variables such as %error-verbose.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: avoid duplicate warnings for deprecated directives
+	Currently, on
+
+	    %define parser_class_name "Parser"
+	    %define parser_class_name "Parser"
+	    %%
+	    exp:;
+
+	we issue:
+
+	    foo.y:1.9-25: warning: deprecated directive, use '%define api.parser.class {Parser}' [-Wdeprecated]
+	     %define parser_class_name "Parser"
+	             ^~~~~~~~~~~~~~~~~
+	    foo.y:2.9-25: warning: deprecated directive, use '%define api.parser.class {Parser}' [-Wdeprecated]
+	     %define parser_class_name "Parser"
+	             ^~~~~~~~~~~~~~~~~
+	    foo.y:2.9-25: error: %define variable 'api.parser.class' redefined
+	     %define parser_class_name "Parser"
+	             ^~~~~~~~~~~~~~~~~
+	    foo.y:1.9-25:     previous definition
+	     %define parser_class_name "Parser"
+	             ^~~~~~~~~~~~~~~~~
+
+	Let's get rid of the second warning about the deprecated variable
+	parser_class_name.  This is noise, but it will also be a problem with
+	fixits for removing duplicates, as we will first generate the update,
+	and then it's too late to remove it: fixits do not edit the result of
+	previous fixits.
+
+	So generate this instead:
+
+	    foo.y:1.1-34: warning: deprecated directive, use '%define api.parser.class {Parser}' [-Wdeprecated]
+	     %define parser_class_name "Parser"
+	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	    foo.y:2.1-34: error: %define variable 'api.parser.class' redefined
+	     %define parser_class_name "Parser"
+	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	    foo.y:1.1-34:     previous definition
+	     %define parser_class_name "Parser"
+	     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	* src/muscle-tab.c (muscle_percent_variable_update): Pass the warning
+	to the caller, instead of issuing it.
+	(muscle_percent_define_insert): Issue this warning only if we don't
+	have to complain about a duplicate definition.
+	* tests/input.at: Adjust expectations.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: update the grammar file
+	Let's use the fixits to actually update the grammar files.
+
+	* src/getargs.h, src/getargs.c (update_flag): New.
+	* src/fixits.h, src/fixits.c (fixits_run): New.
+	* src/main.c (main): Invoke fixits_run when --update is passed.
+	* tests/input.at (Deprecated directives): Check --update.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: improve accuracy for deprecated %define variables
+	* src/parse-gram.y: Use the location of the whole definition to record
+	the location of a %define variable, instead of just the name of the
+	variable.
+	Adjust tests.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: keep the fixits
+	Introduce proper support for fixits, instead of just printing them on
+	demand.
+
+	* bootstrap.conf: We need gnulib's xlists.
+	* src/fixits.h, src/fixits.c: New.
+	* src/complain.c (deprecated_directive): Use fixits_register.
+	* src/main.c (main): Use fixits_free.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: add -ffixit support for deprecated features
+	Issue directives for IDE/editors to fix the source file.
+	http://clang.llvm.org/docs/UsersManual.html#cmdoption-fdiagnostics-parseable-fixits
+
+	Do it for deprecated features.  For instance:
+
+	    $ cat foo.y
+	    %error-verbose
+
+	    %name-prefix = "foo"
+	    %name-prefix="bar"
+	    %define parser_class_name "Parser"
+
+	    %%
+	    exp:;
+
+	    $ LC_ALL=C ./_build/8d/tests/bison -ffixit /tmp/foo.yy
+	    /tmp/foo.yy:1.1-14: warning: deprecated directive, use '%define parse.error verbose' [-Wdeprecated]
+	     %error-verbose
+	     ^^^^^^^^^^^^^^
+	    fix-it:"/tmp/foo.yy":{1:1-1:15}:"%define parse.error verbose"
+	    /tmp/foo.yy:3.1-20: warning: deprecated directive, use '%define api.prefix {foo}' [-Wdeprecated]
+	     %name-prefix = "foo"
+	     ^^^^^^^^^^^^^^^^^^^^
+	    fix-it:"/tmp/foo.yy":{3:1-3:21}:"%define api.prefix {foo}"
+	    /tmp/foo.yy:4.1-18: warning: deprecated directive, use '%define api.prefix {bar}' [-Wdeprecated]
+	     %name-prefix="bar"
+	     ^^^^^^^^^^^^^^^^^^
+	    fix-it:"/tmp/foo.yy":{4:1-4:19}:"%define api.prefix {bar}"
+	    /tmp/foo.yy:5.9-25: warning: deprecated directive, use '%define api.parser.class {Parser}' [-Wdeprecated]
+	     %define parser_class_name "Parser"
+	             ^^^^^^^^^^^^^^^^^
+	    fix-it:"/tmp/foo.yy":{5:9-5:26}:"%define api.parser.class {Parser}"
+	    /tmp/foo.yy:5.9-25: error: %define variable 'api.parser.class' is not used
+	     %define parser_class_name "Parser"
+	             ^^^^^^^^^^^^^^^^^
+
+	* src/getargs.h, src/getargs.c (feature_fixit_parsable): New.
+	(feature_types, feature_args): Use it.
+	* src/complain.c (deprecated_directive): Use it.
+
+	* tests/input.at: Check it.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: prefer ^~~~ to ^^^^ to underline code
+	That's what both GCC and Clang do, and it is indeed much nicer to
+	read.  From:
+
+	    foo.y:1.1-14: warning: deprecated directive, use '%define parse.error verbose' [-Wdeprecated]
+	     %error-verbose
+	     ^^^^^^^^^^^^^^
+	    foo.y:4.1-20: warning: deprecated directive, use '%define api.prefix {foo}' [-Wdeprecated]
+	     %name-prefix = "foo"
+	     ^^^^^^^^^^^^^^^^^^^^
+
+	to:
+
+	    foo.y:1.1-14: warning: deprecated directive, use '%define parse.error verbose' [-Wdeprecated]
+	     %error-verbose
+	     ^~~~~~~~~~~~~~
+	    foo.y:4.1-20: warning: deprecated directive, use '%define api.prefix {foo}' [-Wdeprecated]
+	     %name-prefix = "foo"
+	     ^~~~~~~~~~~~~~~~~~~~
+
+	* src/location.c (location_caret): Use ^~~~.
+	Adjust tests expectations.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: improve them for %name-prefix
+	Currently the diagnostics for %name-prefix are not precise enough.  In
+	particular, they does not show that braces must be used instead of
+	quotes.
+
+	Before:
+
+	    foo.y:3.1-14: warning: deprecated directive, use '%define api.prefix' [-Wdeprecated]
+	     %name-prefix = "foo"
+	     ^^^^^^^^^^^^^^
+
+	After:
+
+	    foo.y:3.1-20: warning: deprecated directive, use '%define api.prefix {foo}' [-Wdeprecated]
+	     %name-prefix = "foo"
+	     ^^^^^^^^^^^^^^^^^^^^
+
+	To do this we need the value passed to %name-prefix, so move the
+	warning from the scanner to the parser.
+
+	Accuracy will be very important for the forthcoming changes.
+
+	* src/parse-gram.y (do_name_prefix): New.
+	(PERCENT_NAME_PREFIX): Have a semantic value: the raw source, with
+	possibly underscores, equal sign, and spaces.  This is used to provide
+	a more accurate message.  It does not take comments into account,
+	but...
+	* src/scan-gram.l (%name-prefix): Delegate the warnings to the parser.
+
+	* tests/headers.at, tests/input.at: Adjust expectations.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	diagnostics: style: avoid allocating memory when not needed
+	* src/muscle-tab.c (muscle_percent_variable_update): Avoid allocating
+	memory when it is not needed, which should be most of the time (when
+	there's no update to perform).
+	Adjust callers.
+
+2019-01-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: avoid warnings about extraneous semi-colons
+	Reported by Derek Clegg.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00005.html
+
+	* configure.ac (warn_cxx): Add -Wextra-semi.
+	* data/skeletons/c++.m4: Remove extraneous semi-colon.
+
+2019-01-13  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: minor changes
+	* src/muscle-tab.c: Sort alphabetically.
+	* src/scan-gram.l: Reduce scopes.
+	Initialize variables.
+
+2019-01-13  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: beware of -Wshadow
+	This line:
+
+	    slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
+
+	triggers warnings:
+
+	    parse.h:1790:11: note: shadowed declaration is here
+
+	Reported by Frank Heckenbach.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00002.html
+
+	* configure.ac (warn_c): Move -Wshadow to...
+	(warn_common): here.
+	* data/skeletons/stack.hh (slice): Define as an inner class of stack.
+	* data/skeletons/lalr1.cc: Adjust.
+	Rename the variable as 'range' instead of 'slice'.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.2.90
+	* NEWS: Record release date.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	yacc: fix relocatability
+	* src/yacc.in (prefix): Define it, as it's typically needed for
+	exec_prefix.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	syntax-check: adjust paths
+	* cfg.mk: here.
+	(require_config_h): New.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting clean up
+	* data/skeletons/d.m4, examples/d/calc.y, src/output.c,
+	* src/parse-gram.y:
+	No tab, no trailing spaces.
+	Reported by syntax-check.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	po: remove bitset/stats.c
+	* po/POTFILES.in: here.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: fix usage of AT_PARSER_CHECK
+	The parser must be the first command.  Caught by syntax-check.
+
+	* tests/c++.at: here.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: isolate the creation of tname in a function
+	* src/output.c (prepare_symbol_names): New.
+	Use it.
+
+2019-01-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: formatting changes
+	* tests/input.at, tests/regression.at: here.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: use @option consistently
+	* doc/bison.texi: Use @option, not @code, for options.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	yacc.c: avoid negated if
+	* data/skeletons/yacc.c: Prefer a "direct" conditional.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	package: bump copyrights to 2019
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	java/d: rename some %define variables for consistency
+	See 890ee8a1fd288b3cc1c21c49ea0ece696ef40565 and
+	https://lists.gnu.org/archive/html/bison-patches/2019-01/msg00024.html.
+
+	* data/skeletons/d.m4, data/skeletons/java.m4
+	(abstract, annotations, extends, final, implements, public, strictfp):
+	Rename as...
+	(api.parser.abstract, api.parser.annotations, api.parser.extends)
+	(api.parser.final, api.parser.implements, api.parser.public)
+	(api.parser.strictfp):
+	these.
+
+	* src/muscle-tab.c (muscle_percent_variable_update): Ensure backward
+	compatibility.
+
+	* doc/bison.texi, examples/d/calc.y, examples/java/Calc.y,
+	tests/input.at: Adjust.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	java/d: remove useless macros
+	There are many macros that are defined and used just
+	once (b4_public_if, b4_abstract_if, etc.).  That's overkill.  Rather,
+	let's define a macro to build the "public class YYParser" line.
+
+	It appears that the same syntax with "extends", "abstract", etc. is
+	implemented in the D parser, which looks very fishy...
+
+	* data/skeletons/d.m4, data/skeletons/java.m4 (b4_public_if)
+	(b4_abstract_if, b4_final_if, b4_strictfp_if): Replace with
+	(b4_parser_class_declaration): this.
+	* data/skeletons/lalr1.d, data/skeletons/lalr1.java: Adjust.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: clean tests
+	* tests/named-refs.at: here.
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+	In particular, report uninitialized submodules instead of breaking
+	symlinks.
+
+	For reports, see
+	https://lists.gnu.org/archive/html/bug-bison/2011-05/msg00012.html
+	https://lists.gnu.org/archive/html/help-bison/2018-12/msg00034.html
+
+	For a fix, see
+	https://lists.gnu.org/archive/html/bug-gnulib/2019-01/msg00024.html
+
+2019-01-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.cc: fix the handling of syntax_error from the scanner
+	Commit 90a8537e6287f92fb3d5be0258a69247a742f12e was right, but issued
+	two error messages.  Commit 80ef7e7639f99618bee490b2dea02b5fd9ab28e5
+	tried to address that by mapping yychar and yytoken to empty, but that
+	completely breaks the invariants of glr.c.  In particular, yygetToken
+	can be called repeatedly and is expected to return the latest result,
+	unless yytoken is YYEMPTY.  Since the previous attempt was "recording"
+	that the token was coming from an exception by setting it to YYEMPTY,
+	instead of getting again the faulty token, we fetched another one.
+
+	Rather, revert to the first approach: map yytoken to "invalid token",
+	but record in yychar the fact that we come from an exception thrown in
+	the scanner.
+
+	* data/skeletons/glr.c (YYFAULTYTOK): New.
+	(yygetToken): Use it to record syntax errors from the scanner.
+	* tests/c++.at (Syntax error as exception): In addition to checking
+	syntax_error with error recovery, make sure it also behaves as
+	expected without.
+
+2019-01-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	clearly deprecate %name-prefix
+	* src/scan-gram.l (%name-prefix): Issue a deprecation warning.
+
+	* tests/calc.at, tests/headers.at, tests/input.at, tests/java.at,
+	* tests/javapush.at, tests/local.at: Adjust expectations.
+	Or disable -Wdeprecated.
+
+	* doc/bison.texi: Document that %name-prefix is replaced by %define
+	api.prefix.
+
+2019-01-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: clean up the Java/D examples
+	* examples/java/Calc.y: Fix indentation.
+	Sort.
+	Don't use %name-prefix, since api.parser.class is already defined.
+	* examples/d/calc.y: Likewise.
+
+2019-01-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: formatting changes
+	* doc/bison.texi: here.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	rename parser_class_name as api.parser.class
+	The previous name was historical and inconsistent.
+
+	* src/muscle-tab.c (define_directive): Use the proper value passing
+	syntax, based on the muscle kind.
+	(muscle_percent_variable_update): Use the right value passing syntax.
+	Migrate from parser_class_name to api.parser.class.
+
+	* data/skeletons: Migrate from parser_class_name to api.parser.class.
+
+	* doc/bison.texi (%define Summary): Document both parser_class_name
+	and api.parser.class.
+	Promote the latter over the former.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes
+	* src/scan-gram.l: Here.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: glr.c: prefer returning a value rather than passing pointers
+	This is very debatable.  This function is not pure at all, so it could
+	stick to returning void: that's a common coding style to tell the
+	difference between "real" (pure) functions and side-effecting
+	subroutines.  However, we already have this style elsewhere (e.g.,
+	yylex), and I feel the callers are somewhat nice to read this way.
+
+	* data/skeletons/glr.c (yygetLRActions): Return the action rather than
+	passing by pointer.
+	While at it, fix type of yytoken.
+	Adjust callers.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.cc: don't issue two error messages when syntax_error is thrown
+	Reported by Askar Safin.
+	https://lists.gnu.org/archive/html/bison-patches/2019-01/msg00000.html
+
+	* data/skeletons/glr.c (yygetToken): Return YYEMPTY when an exception
+	is thrown.
+	* data/skeletons/lalr1.cc: Log when an exception is caught.
+	* tests/c++.at (Syntax error as exception): Be sure to recover from
+	error before triggering another error.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	skeletons: shorten b4_parser_class_name to b4_parser_class
+	* skeletons/c++.m4, skeletons/d.m4, skeletons/glr.c, skeletons/glr.cc,
+	* skeletons/java.m4, skeletons/lalr1.cc, skeletons/lalr1.d,
+	* skeletons/lalr1.java: Here.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.cc: remove duplicate definition of YYLLOC_DEFAULT
+	It's already provided by glr.c.
+
+	* data/skeletons/glr.cc (b4_post_prologue): Here.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: sort includes in scanners
+	* src/scan-code.l, src/scan-gram.l, src/scan-skel.l: Reorder includes.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes in the doc
+	* doc/bison.texi: here.
+
+2019-01-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: remove stray empty lines
+	* data/skeletons/glr.c, data/skeletons/glr.cc: here.
+	* data/skeletons/bison.m4 (b4_glr_cc_if): Move it here.
+
+2018-12-31  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.cc: support syntax_error exceptions
+	Kindly requested by Аскар Сафин (Askar Safin).
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00033.html
+
+	* data/skeletons/glr.c (b4_glr_cc_if): New.
+	Use it.
+	(yygetToken): Catch syntax_errors.
+	* data/skeletons/glr.cc (YY_EXCEPTIONS): New.
+	* tests/c++.at: Check it.
+
+2018-12-31  Akim Demaille  <akim.demaille@gmail.com>
+
+	glr.c: factor the calls to yylex
+	The call protocol of yylex is quite complex, and repeated three
+	times.  Let's factor it.
+
+	* data/skeletons/glr.c (yygetToken): New.
+	Use it.
+
+2018-12-31  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes in glr.c
+	* data/skeletons/glr.c (yyrecoverSyntaxError): here.
+
+2018-12-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: refactor
+
+2018-12-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: inline the implementation of syntax_error in its definition
+	This way, it is easier to make sure its implementation is available in
+	glr.cc too, which is not the case currently.
+
+	* data/skeletons/c++.m4 (b4_public_types_define): Move the
+	implementation of syntax_error...
+	(b4_public_types_declare): here.
+
+2018-12-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes
+	* tests/input.at: here.
+
+2018-12-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbol: don't crash on symbol without content
+	When running with --trace=parse, we may crash.
+
+	* src/symtab.c (symbol_print): Avoid that.
+
+2018-12-28  Akim Demaille  <akim.demaille@gmail.com>
+
+	README-hacking: update
+
+2018-12-28  Akim Demaille  <akim.demaille@gmail.com>
+
+	reader: get rid of a useless function
+	Useless since 58d7a1a1c7497ba51a35fcf991c5b047f692fe18 (2006).
+
+	* src/parse-gram.y, src/reader.h (token_name): Remove, unused.
+
+2018-12-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	parsers: fix minor stylistic issues
+	* data/skeletons/variant.hh (b4_token_constructor_declare): Remove,
+	unused since the previous commit.
+	Fix indentation issues.
+	* data/skeletons/c++.m4: Fix indentation issues.
+
+2018-12-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: check several parsers in the same program
+	* tests/local.at (AT_LOCATION_TYPE_IF): Turn into...
+	(AT_LOCATION_TYPE_SPAN_IF): this.
+	Adjust dependencies.
+	* tests/headers.at (Several parsers): Add another C++ parser,
+	which uses the first C++ parser's locations.
+
+2018-12-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: variants: fuse declarations and definitions
+	We used to create a short definition of yy::parser with all the
+	implementations of its member functions outside.  But yy::parser is no
+	longer short and simple to read.  Maintaining each function twice is
+	painful: a lot of redundancy but different indentation levels, output
+	which depends on whether we are in a header or not (see
+	d132c2d5455135f63a7497c38358eadd6e3a6af8), etc.
+
+	Let's simplify this and put the implementations into the class
+	definition itself.
+
+	Discussed in this monologue:
+	https://lists.gnu.org/archive/html/bison-patches/2018-12/msg00058.html.
+
+	* data/skeletons/c++.m4, data/skeletons/lalr1.cc,
+	* data/skeletons/variant.hh (b4_basic_symbol_constructor_define)
+	(_b4_token_constructor_declare, b4_token_constructor_declare)
+	Merge into...
+	(b4_basic_symbol_constructor_define, _b4_token_constructor_define)
+	(b4_token_constructor_define): these.
+
+2018-12-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: fix dependencies
+	Commit 112ccb5ed73ba5c64b0b5300d8b9b686f02f094c moved the skeletons
+	from dist_pkgdata_DATA to dist_skeletons_DATA, hence broke the dependencies.
+
+	* Makefile.am (dependencies): New.
+	Use it where appropriate.
+
+2018-12-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: move stack<T> inside yy::parser
+	We used to define such auxiliary structures outside the class, mainly
+	as a matter of style to keep the definition of yy::parser short and
+	simple.  However, now there's a lot more code generated inside the
+	class definition (e.g., all the token constructors), so the
+	readability no longer applies.
+
+	However, if we move stack (and slice) inside yy::parser, then it
+	should no longer be needed to change the namespace to have multiple
+	parsers: changing the class name should suffice.
+
+	One common argument against inner classes is that they code bloat.  It
+	hardly applies here, since typically different parsers will have
+	different semantic value types, hence different actual stack types.
+
+	* data/skeletons/lalr1.cc: Invoke b4_stack_define inside yy::parser.
+
+2018-12-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	package: make bison a relocatable package
+	Suggested by David Barto
+	https://lists.gnu.org/archive/html/help-bison/2015-02/msg00004.html
+	and Victor Zverovich.
+	https://lists.gnu.org/archive/html/bison-patches/2018-10/msg00121.html
+
+	This is very easy to do, thanks to work by Bruno Haible in gnulib.
+	See "Supporting Relocation" in gnulib's documentation.
+
+	* bootstrap.conf: We need relocatable-prog and relocatable-script (for yacc).
+
+	* src/yacc.in: New.
+	* configure.ac, src/local.mk: Instantiate it.
+	* src/main.c, src/output.c (main, pkgdatadir): Use relocatable2.
+
+	* doc/bison.texi (FAQ): Document it.
+
+2018-12-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	README: wrap paragraphs
+
+2018-12-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-12-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	package: move skeletons into data/skeletons
+	* data/bison.m4, data/c++-skel.m4, data/c++.m4, data/c-like.m4,
+	* data/c-skel.m4, data/c.m4, data/d-skel.m4, data/d.m4, data/glr.c,
+	* data/glr.cc, data/java-skel.m4, data/java.m4, data/lalr1.cc,
+	* data/lalr1.d, data/lalr1.java, data/location.cc, data/stack.hh,
+	* data/variant.hh, data/yacc.c:
+	Move to...
+	* data/skeletons: here.
+	Use b4_skeletonsdir instead of b4_pkgdatadir.
+
+	* data/local.mk, src/output.c: Adjust.
+
 2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
 
-	version 3.2.4
-	* NEWS: Record release date.
+	c++: style: use consistently this/that instead of this/other
+	* data/lalr1.cc, data/variant.hh: here.
 
 2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
 
@@ -39,24 +1147,109 @@
 	Use them.
 	Avoid useless Bison invocations.
 
-2018-12-23  Akim Demaille  <akim.demaille@gmail.com>
+2018-12-24  Akim Demaille  <akim.demaille@gmail.com>
 
 	c++: style: use consistently this/that instead of this/other
 	* data/c++.m4: here.
 
-2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+2018-12-23  Akim Demaille  <akim.demaille@gmail.com>
 
-	maint: post-release administrivia
-	* NEWS: Add header line for next release.
-	* .prev-version: Record previous version.
-	* cfg.mk (old_NEWS_hash): Auto-update.
+	tests: fixes
+	* tests/c++.at: Use AT_YYLEX_PROTOTYPE etc.
+	Which requires that we use the same argument names (lvalp, etc.).
+	* tests/local.at (AT_NAME_PREFIX): Fix regex.
 
-2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+2018-12-22  Akim Demaille  <akim.demaille@gmail.com>
 
-	version 3.2.3
-	* NEWS: Record release date.
+	c++: style: rename a few macros for clarity
+	* data/c++.m4, data/lalr1.cc, data/variant.hh:
+	s/b4_symbol_constructor/b4_token_constructor/g, as this is really what
+	is being defined.
 
-2018-12-18  Akim Demaille  <akim.demaille@gmail.com>
+2018-12-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: exhibit a safe symbol_type
+	Instead of introducing make_symbol (whose name, btw, somewhat
+	infringes on the user's "name space", if she defines a token named
+	"symbol"), let's make the construction of symbol_type safer, using
+	assertions.
+
+	For instance with:
+
+	    %token ':' <std::string> ID <int> INT;
+
+	generate:
+
+	    symbol_type (int token, const std::string&);
+	    symbol_type (int token, const int&);
+	    symbol_type (int token);
+
+	It does mean that now named token constructors (make_ID, make_INT,
+	etc.) go through a useless assert, but I think we can ignore this: I
+	assume any decent compiler will inline the symbol_type ctor inside the
+	make_TOKEN functions, which will show that the assert is trivially
+	verified, hence I expect no code will be emitted for it.  And anyway,
+	that's an assert, NDEBUG controls it.
+
+	* data/c++.m4 (symbol_type): Turn into a subclass of
+	basic_symbol<by_type>.
+	Declare symbol constructors when variants are enabled.
+	* data/variant.hh (_b4_type_constructor_declare)
+	(_b4_type_constructor_define): Replace with...
+	(_b4_symbol_constructor_declare, _b4_symbol_constructor_def): these.
+	Generate symbol_type constructors.
+	* doc/bison.texi (Complete Symbols): Document.
+	* tests/types.at: Check.
+
+2018-12-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: provide symbol constructors per type
+	On
+
+	    %token <int> FOO BAR
+
+	we currently generate make_FOO(int) and make_BAR(int).  However, in
+	order to factor their scanners, some users would also like to have
+	make_symbol(tok, int), where tok is FOO or BAR.  To ensure type
+	safety, add assertions that do check that value type and token type
+	match.  Bind this assertion to the parse.assert %define variable.
+
+	Suggested by Frank Heckenbach.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00034.html
+	Should also match expectations from Аскар Сафин.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00023.html
+
+	* data/variant.hh: Use b4_token_visible_if where applicable.
+	(_b4_type_constructor_declare, _b4_type_constructor_define): New.
+	Use them.
+
+2018-12-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: style changes
+	* data/c++.m4, data/variant.hh: Improve layout of the generated code.
+	Avoid casts.
+	(_b4_symbol_constructor_declare, _b4_symbol_constructor_define): Rename
+	as...
+	(_b4_token_maker_declare, _b4_token_maker_define): these.
+	* tests/types.at: Improve pair printing.
+
+2018-12-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: simplify tests
+	* tests/types.at: Simplify C++ instantiations.
+
+2018-12-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: use b4_token_visible_if
+	And other formatting/comment changes.
+
+	* data/variant.hh: Here.
+
+2018-12-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-12-19  Akim Demaille  <akim.demaille@gmail.com>
 
 	c++: fix token constructors for types with commas
 	Bitten by macros, again.
@@ -70,31 +1263,976 @@
 	case of token constructors.
 	* tests/types.at: Also check token constructors on types with commas.
 
+2018-12-19  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-12-17  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbols: document the overhaul of symbol declarations
+	* doc/bison.texi (Symbol Decls): New.
+
+2018-12-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbols: check more invalid declarations
+	* tests/input.at (Invalid %nterm uses): Rename as...
+	(Invalid symbol declarations): this.
+	Extend.
+
+2018-12-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbols: check the previous commit
+	* tests/input.at (Symbol declarations): New.
+
+2018-12-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-12-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbols: clean up their parsing
+	Prompted by Rici Lake.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00000.html
+
+	We have four classes of directives that declare symbols: %nterm,
+	%type, %token, and the family of %left etc.  Currently not all of them
+	support the possibility to have several type tags (`<type>`), and not
+	all of them support the fact of not having any type tag at all
+	(%type).  Let's unify this.
+
+	- %type
+	  POSIX Yacc specifies that %type is for nonterminals only.  However,
+	  some Bison users want to use it for both tokens and nterms
+	  (actually, Bison's own grammar does this in several places, e.g.,
+	  CHAR).  So it should accept char/string literals.
+
+	  As a consequence cannot be used to declare tokens with their alias:
+	  `%type foo "foo"` would be ambiguous (are we defining foo = "foo",
+	  or are these two different symbols?)
+
+	  POSIX specifies that it is OK to use %type without a type tag.  I'm
+	  not sure what it means, but we support it.
+
+	- %token
+	  Accept token declarations with number and string literal:
+	  (ID|CHAR) NUM? STRING?.
+
+	- %left, etc.
+	  They cannot be the same as %token, because we accept to declare the
+	  symbol with %token, and to then qualify its precedence with %left.
+	  Then `%left foo "foo"` would also be ambiguous: foo="foo", or two
+	  symbols.
+
+	  They cannot be simply a list of identifiers, but POSIX Yacc says we
+	  can declare token numbers here.  I personally think this is a bad
+	  idea, precedence management is tricky in itself and should not be
+	  cluttered with token declaration issues.
+
+	  We used to accept declaring a token number on a string literal here
+	  (e.g., `%left "token" 1`).  This is abnormal.  Either the feature is
+	  useful, and then it should be supported in %token, or it's useless
+	  and we should not support it in corner cases.
+
+	- %nterm
+	  Obviously cannot accept tokens, nor char/string literals.  Does not
+	  exist in POSIX Yacc, but since %type also works for terminals, it is
+	  a nice option to have.
+
+	* src/parse-gram.y: Avoid relying on side effects.  For instance, get
+	rid of current_type, rather, build the list of symbols and iterate
+	over it to assign the type.
+	It's not always possible/convenient.  For instance, we still use
+	current_class.
+	Prefer "decl" to "def", since in the rest of the implementation we
+	actually "declare" symbols, we don't "define" them.
+	(token_decls, token_decls_for_prec, symbol_decls, nterm_decls): New.
+	Use them for %token, %left, %type and %nterm.
+	* src/symlist.h, src/symlist.c (symbol_list_type_set): New.
+	* tests/regression.at b/tests/regression.at
+	(Token number in precedence declaration): We no longer accept
+	to give a number to string literals.
+
+2018-12-15  Akim Demaille  <akim.demaille@gmail.com>
+
+	symbols: set tag_seen when assigning a type to symbols
+	* src/reader.h, src/reader.c (tag_seen): Move to...
+	* src/symtab.h, src/symtab.c: here.
+	(symbol_type_set): Set it to true.
+	* src/parse-gram.y: Don't.
+
+2018-12-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: isolate test about Yacc warnings
+	* tests/input.at (Yacc warnings): New.
+	(AT_CHECK_UNUSED_VALUES): Remove checks about yacc.
+
+2018-12-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: warn about string literals in Yacc mode
+	* src/scan-gram.l (scan_integer): Warn.
+	* tests/input.at (Yacc warnings on symbols): Check.
+
+2018-12-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: warn about hexadecimal token numbers in Yacc mode
+	* src/scan-gram.l (scan_integer): Warn.
+	* tests/input.at (Yacc warnings on symbols): Check.
+
+2018-12-14  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: reprecate %nterm back
+	After having spent quite some time on cleaning the handling of symbol
+	declarations in the grammar files, I believe we should keep it.
+
+	It looks like it's a duplicate of %type, but it is not.  While POSIX
+	Yacc requires %type to apply only to nonterminal symbols, it appears
+	that both byacc and bison accept it for tokens too.  And some
+	experienced users do actually expect this feature to group
+	symbols (terminal or not) by type ("On the other hand, it is generally
+	more useful IMHO to group terminals and non-terminals with the same
+	type tag together",
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00000.html).
+	Even Bison's own parser does this today (see CHAR).
+
+	Basically reverts 7928c3e6fbdf47ff81184966cee937e6aa694b94.
+
+	* src/scan-gram.l (%nterm): Dedeprecate, but issue a Wyacc warning.
+	* tests/input.at: Adjust expectations.
+	(Yacc warnings  on symbols): New.
+	* src/symtab.c (symbol_class_set): Fix error introduced in
+	20b07467938cf880a1d30eb30d6e191843a21fec.
+
+2018-12-11  Eduard Staniloiu  <edi33416@gmail.com>
+
+	CI: add dmd support
+	* .travis.yml: here.
+
+2018-12-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: s/non-terminal/nonterminal/
+	I personally prefer 'non terminal', or 'non-terminal', but
+	'nonterminal' is the common spelling.
+
+	* data/glr.c, src/parse-gram.y, src/symtab.c, src/symtab.h,
+	* tests/input.at, doc/refcard.tex: here.
+
+2018-12-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: rename error functions for clarity
+	* src/symtab.c (symbol_redeclaration, semantic_type_redeclaration)
+	(user_token_number_redeclaration):
+	Rename as...
+	(complain_symbol_redeclared, complain_semantic_type_redeclared)
+	(complain_user_token_number_redeclared):
+	this.
+
+2018-12-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: improve the error message for symbol class redefinition
+	Currently our error messages include both "symbol redeclared" and
+	"symbol redefined", and they mean something different.  This is
+	obscure, let's make this clearer.
+
+	I think the idea between 'definition' vs. 'declaration' is that in the
+	case of the nonterminals, the actual definition is its set of rules,
+	so %nterm would be about declaration.  The case of %token is less
+	clear.
+
+	* src/symtab.c (complain_class_redefined): New.
+	(symbol_class_set): Use it.
+	Simplify the logic of this function to clearly skip its body when the
+	preconditions are not met.
+	* tests/input.at (Symbol class redefinition): New.
+
+2018-12-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: simplify computation of yydebug
+	* examples/c/lexcalc/parse.y: here.
+
+2018-12-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: support variadic emplace
+	Suggested by Askar Safin.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00006.html
+
+	* data/variant.hh: Implement.
+	* tests/types.at: Check.
+	* doc/bison.texi: Document.
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: add a simple Flex+Bison example in C
+	Suggested by Askar Safin.
+	http://lists.gnu.org/archive/html/bug-bison/2018-12/msg00003.html
+
+	* examples/c/lexcalc/Makefile, examples/c/lexcalc/README.md,
+	* examples/c/lexcalc/lexcalc.test, examples/c/lexcalc/local.mk,
+	* examples/c/lexcalc/parse.y, examples/c/lexcalc/scan.l:
+	New.
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: sort them per language and complete them
+	Convert some of the READMEs to Markdown, which is now more common, and
+	nicely displayed in some git hosting services.
+
+	Add missing READMEs and Makefiles.  Generate XML, HTML and Dot files.  Be
+	sure to ship the test files.  Complete CLEANFILES to remove all generated
+	files.
+
+	* examples/calc++: Move into...
+	* examples/c++: here.
+	* examples/mfcalc, examples/rpcalc: Move into...
+	* examples/c: here.
+
+	* examples/README.md, examples/c++/calc++/Makefile, examples/c/local.mk,
+	* examples/c/mfcalc/Makefile, examples/c/rpcalc/Makefile,
+	* examples/d/README.md, examples/java/README.md:
+	New files.
+
+	* examples/test (medir): Be robust to deeper directory nesting.
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: minor refactoring
+	* src/parse-gram.y (symbol.prec): Reuse int.opt.
+
+2018-12-09  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: move checks inside the called functions
+	Revamping the handling of the symbols is the grammar is much more
+	delicate than I anticipated.  Let's first move things around for
+	clarity.
+
+	* src/symtab.c (symbol_make_alias): Don't accept to alias
+	non-terminals.
+	(symbol_user_token_number_set): Don't accept user token numbers
+	for non-terminals.
+	Don't do anything in case of redefinition, instead of trying to
+	update.  The flow is eaier to follow this way.
+
+2018-12-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: fix double definition of YYSemanticType
+	* data/lalr1.d: When moving to b4_user_union_members, it also defines
+	b4_tag_seen_flag, so we had two definitions.
+
+2018-12-08  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-12-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: fix incorrect condition to raise a syntax error
+	* src/parse-gram.y (symbol_def): Fix test.
+
+2018-12-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: fix use of b4_union_members
+	* data/lalr1.d: Use b4_user_union_members instead.
+
+2018-12-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: comment changes
+	* data/variant.hh: here.
+
+2018-12-06  Akim Demaille  <akim.demaille@gmail.com>
+
+	java, d: add a Makefile for the example
+	* examples/java/Makefile, examples/d/Makefile: New.
+
+2018-12-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: scope reduction in ielr.c
+	* src/ielr.c: here.
+
+2018-12-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: scope reduction in lalr.c
+	* src/lalr.c: here.
+
+2018-12-05  Akim Demaille  <akim.demaille@gmail.com>
+
+	d, java: compute static subtractions
+	* data/d.m4, data/java.m4: Use b4_subtract where appropriate.
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: add an example
+	* examples/d/calc.test, examples/d/calc.y, examples/d/local.mk:
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: update the skeleton
+	* data/d.m4, data/lalr1.d: Catch up with Bison.
+	And actually, also catch up with D.
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: add experimental support for the D language
+	* configure.ac (ENABLE_D): New.
+	* src/getargs.c (valid_languages): Add d.
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	d: add skeleton for the D language
+	Contributed by Oliver Mangold.
+	https://lists.gnu.org/archive/html/help-bison/2012-01/msg00000.html
+
+	* README-D.txt, d-skel.m4, d.m4, lalr1.d: New.
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: regenerate them when version.texi changes
+	When we extract the examples from the documentation, %require
+	"@value{VERSION}" is replaced with the current version.  If we change
+	the git branch, without changing the documentation, the generated
+	examples will %require a version of Bison that differs from the actual
+	version.
+
+	* examples/local.mk (extracted.stamp): Depend on doc/version.texi.
+
+2018-12-04  Akim Demaille  <akim.demaille@gmail.com>
+
+	skeletons: start some technical documentation
+	* data/README: Convert to Markdown.
+	Start documenting some of the macros used in all our skeletons.
+	Simplify and fix the documentation of the macros in the skeletons.
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	backend: revamp the handling of symbol types
+	Currently it is the front end that passes the symbol types to the
+	backend.  For instance:
+
+	  %token <ival> NUM
+	  %type <ival> exp1 exp2
+	  exp1: NUM { $$ = $1; }
+	  exp2: NUM { $<ival>$ = $<ival>1; }
+
+	In both cases, $$ and $1 are passed to the backend as having type
+	'ival' resulting in code like `val.ival`.  This is troublesome in the
+	case of api.value.type=union, since in that the case the code this:
+
+	  %define api.value.type union
+	  %token <int> NUM
+	  %type <int> exp1 exp2
+	  exp1: NUM { $$ = $1; }
+	  exp2: NUM { $<int>$ = $<int>1; }
+
+	because in this case, since the backend does not know the symbol being
+	processed, it is forced to generate casts in both cases: *(int*)(&val)`.
+	This is unfortunate in the first case (exp1) where there is no reason
+	at all to use a cast instead of `val.NUM` and `val.exp1`.
+
+	So instead delegate the computation of the actual value type to the
+	backend: pass $<ival>$ as `symbol-number, ival` and $$ as
+	`symbol-number, MULL`, instead of passing `ival` before.
+
+	* src/scan-code.l (handle_action_dollar): Find the symbol the action
+	is about, not just its tyye.  Pass both symbol-number, and explicit
+	type tag ($<tag>n when there is one) to b4_lhs_value and b4_rhs_value.
+
+	* data/bison.m4 (b4_symbol_action): adjust to the new signature to
+	b4_dollar_pushdef.
+
+	* data/c-like.m4 (_b4_dollar_dollar, b4_dollar_pushdef): Accept the
+	symbol-number as new argument.
+
+	* data/c.m4 (b4_symbol_value): Accept the symbol-number as new
+	argument, and use it.
+	(b4_symbol_value_union): Accept the symbol-number as new
+	argument, and use it to prefer ready a union member rather than
+	casting the union.
+	* data/yacc.c (b4_lhs_value, b4_rhs_value): Accept the new
+	symbol-number argument.
+	Adjust uses of b4_dollar_pushdef.
+	* data/glr.c (b4_lhs_value, b4_rhs_value): Adjust.
+
+	* data/lalr1.cc (b4_symbol_value_template, b4_lhs_value): Adjust
+	to the new symbol-number argument.
+	* data/variant.hh (b4_symbol_value, b4_symbol_value_template): Accept
+	the new symbol-number argument.
+
+	* data/java.m4 (b4_symbol_value, b4_rhs_data): New.
+	(b4_rhs_value): Use them.
+	* data/lalr1.java: Adjust to b4_dollar_pushdef, and use b4_rhs_data.
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: comment and formatting changes
+	* data/bison.m4, data/c++.m4, data/glr.c, data/java.m4, data/lalr1.cc,
+	* data/yacc.c, src/scan-code.l:
+	Fix comments.
+	Prefer POS to denote the position of a symbol in a rule, since NUM
+	is also used to denote symbol numbers.
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	java: make sure the build dir exists
+	* examples/java/local.mk (%D%/Calc.java): here.
+
+2018-12-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: don't define variant<S>, directly define semantic_type
+	Instead of defining yy::variant<S> and then alias
+	yy::parser::semantic_type to variant<sizeof (union_type)>, directly
+	define yy::parser::semantic_type.
+
+	This model is more appropriate if we want to sit the storage on top of
+	unions in C++11.
+
+	* data/variant.hh (b4_variant_define): Specialize and inline the
+	definition into...
+	(b4_value_type_declare): Here.
+	Define union_type here.
+	* data/lalr1.cc: Adjust.
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	C++: use noexcept and constexpr
+	There are probably more opportunities for them.
+	So far, I observed no performance improvements.
+
+	* data/c++.m4, data/lalr1.cc, data/stack.hh: here.
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: also display the examples' test suite log
+	* .travis.yml: here.
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	java: add an example
+	* examples/java/Calc.y: New, based on test 495: "Calculator
+	parse.error=verbose %locations".
+	* examples/java/Calc.test, examples/java/local.mk: New.
+
+	* configure.ac (ENABLE_JAVA): New.
+	* examples/test (prog): Be ready to run Java programs.
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: unsigned int -> unsigned
+	See
+	https://lists.gnu.org/archive/html/bison-patches/2018-08/msg00027.html
+
+	* src/output.c (muscle_insert_unsigned_int_table): Rename as...
+	(muscle_insert_unsigned_table): this.
+
+2018-12-01  Akim Demaille  <akim.demaille@gmail.com>
+
+	output: restore yyrhs and yyprhs
+	This was demanded several times.  See for instance:
+
+	- David M. Warme
+	  https://lists.gnu.org/archive/html/help-bison/2011-04/msg00003.html
+
+	- box12009
+	  http://lists.gnu.org/archive/html/bug-bison/2016-10/msg00001.html
+
+	Basically, this reverts:
+
+	- commit 3d3bc1fe30f356cf674a979409e86ea0f88de4a0
+	  Get rid of (yy)rhs and (yy)prhs
+
+	- commit d333175f63f402dbadb647175e40ad88bf1defb5
+	  Avoid compiler warning.
+
+	Note that since these tables are not needed in the generated parsers,
+	no skeleton requests them.  This change only brings back their
+	definition to M4, making it possible to user-defined skeletons to use
+	these tables.
+
+	* src/output.c (muscle_insert_item_number_table): Define.
+	(prepare_rules): Generate the rhs and prhs tables.
+
+2018-11-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: shorten side-effects on current_type
+	* src/parse-gram.y (tag.opt): Don't change current_type.
+	Rather, return its value.
+	Adjust dependencies.
+
+2018-11-30  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: reduce scopes
+	* src/symlist.c: here.
+
+2018-11-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: don't name C++ files *.c
+	* tests/synclines.at (syncline escapes): Here.
+	Otherwise, Clang generates an error and skips the test.
+
+2018-11-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update
+
+2018-11-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: factor the symbol definition
+	* src/parse-gram.y (int.opt, string_as_id.opt): New.
+	(symbol_def): Use it.
+
+2018-11-29  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: improve location of string alias errors
+	* src/parse-gram.y (symbol_def): Pass the right location for symbol_make_alias.
+	* tests/regression.at (Duplicate string): Move to...
+	* tests/input.at: here.
+	(Token collisions): New.
+
+2018-11-29  Akim Demaille  <akim@lrde.epita.fr>
+
+	diagnostics: complain about Bison directives when -Wyacc
+	* src/complain.h, src/complain.c (bison_directive): New.
+	* src/scan-gram.l (BISON_DIRECTIVE): New.
+	Use it for Bison extensions.
+
+2018-11-28  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: formatting changes
+	* doc/bison.texi: here.
+
+2018-11-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: fix quotation in the test suite
+	* tests/input.at: here.
+
+2018-11-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	%nterm: do not accept character literals
+	Reported by Rici Lake.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00000.html
+
+	* src/complain.h: Formatting change.
+	* src/parse-gram.y (id): Reject character literals used in a context
+	for non-terminals.
+	* tests/input.at (Invalid %nterm uses): Check that.
+
+2018-11-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	%nterm: do not accept numbers nor string alias
+	Reported by Rici Lake.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00000.html
+
+	* src/parse-gram.y (symbol_def): Refuse string aliases and numbers
+	for non-terminals.
+	(prologue_declaration): Recover from errors ended with ';'.
+	* tests/input.at (Invalid %nterm uses): New.
+
+2018-11-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	TODO: update
+
+2018-11-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	doc: formatting changes
+	* doc/bison.texi: Here.
+
+2018-11-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: comment changes
+	* tests/testsuite.at: here.
+
+2018-11-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update ignores
+
+2018-11-26  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: update to use its bitsets
+	Bison's bitset were moved to gnulib.
+
+	* lib/abitset.c, lib/abitset.h, lib/bbitset.h, lib/bitset.c,
+	* lib/bitset.h, lib/ebitset.c, lib/ebitset.h, lib/lbitset.c,
+	* lib/bitset_stats.c, lib/bitset_stats.h, lib/bitsetv-print.c,
+	* lib/bitsetv-print.h, lib/bitsetv.c, lib/bitsetv.h,
+	* lib/lbitset.h, lib/vbitset.c, lib/vbitset.h:
+	Remove.
+
+	* gnulib: Update.
+	* bootstrap.conf, lib/local.mk: Adjust.
+
+2018-11-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	gnulib: use conditional dependencies
+	* bootstrap.conf: here.
+
+2018-11-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: run on xenial
+	Xenial (Ubuntu 16.04) is finally available on Travis.  Let's use it.
+
+	Among the changes:
+
+	- Automake 1.14.1 -> 1.15.0
+	- Doxygen  1.8.6  -> 1.8.11
+	- Flex     2.5.35 -> 2.6.0, with plenty of new compiler warnings
+	- Gettext  0.18.3 -> 0.19.7
+	- Graphviz 2.36.0 -> 2.38.0
+	- Texinfo  5.2    -> 6.1
+
+	* .travis.yml: here.
+
+2018-11-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: we don't need git show
+	* .travis.yml: Don't run it.
+
+2018-11-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-25  Akim Demaille  <akim.demaille@gmail.com>
+
+	warning: avoid warnings about unreachable code
+	Reported by Uxio Prego.
+	https://lists.gnu.org/archive/html/help-bison/2018-11/msg00031.html
+
+	We also need to move the unreachable 'goto' to a reachable place,
+	otherwise clang complains about the code being unreachable anyway.
+	See also https://bugs.llvm.org/show_bug.cgi?id=39736.
+
+	Interestingly, we don't have to apply that trick to
+	`#define YYCDEBUG if (false) std::cerr`, clang does not warn when the
+	code comes from macro expansion.
+
+	* configure.ac: Use -Wunreachable-code when supported.
+	* data/lalr1.cc, data/yacc.c: Pacify clang's warning about `if (0)`
+	by using a macro.
+	Another possibility was to move this statement to a reachable place.
+	* tests/actions.at, tests/c++.at: Avoid generating unreachable code.
+
+2018-11-24  Akim Demaille  <akim.demaille@gmail.com>
+
+	yacc.c: avoid generating dead code
+	We should probably introduce some struct and functions to deal with
+	stack management, rather than open coding it.  yyparse would be much
+	nicer to read, and a better model for possible other skeletons.
+
+	* data/yacc.c (yyparse::yysetstate): Avoid generating code when
+	neither yyoverflow nor YYSTACK_RELOCATE is defined.
+
+2018-11-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	%expect-rr: tune the number of conflicts per rule
+	Currently on a grammar such as
+
+	    exp : a '1' | a '2' | a '3' | b '1' | b '2' | b '3'
+	    a:
+	    b:
+
+	we count only one rr-conflict on the `b:` rule, i.e., we expect:
+
+	    b: %expect-rr 1
+
+	although there are 3 conflicts in total.  That's because in the
+	conflicted state we count only a single conflict, not three (one for
+	each of the lookaheads: '1', '2', '3').
+
+	    State 0
+
+	        0 $accept: . exp $end
+	        1 exp: . a '1'
+	        2    | . a '2'
+	        3    | . a '3'
+	        4    | . b '1'
+	        5    | . b '2'
+	        6    | . b '3'
+	        7 a: . %empty  ['1', '2', '3']
+	        8 b: . %empty  ['1', '2', '3']
+
+	        '1'       reduce using rule 7 (a)
+	        '1'       [reduce using rule 8 (b)]
+	        '2'       reduce using rule 7 (a)
+	        '2'       [reduce using rule 8 (b)]
+	        '3'       reduce using rule 7 (a)
+	        '3'       [reduce using rule 8 (b)]
+	        $default  reduce using rule 7 (a)
+
+	        exp  go to state 1
+	        a    go to state 2
+	        b    go to state 3
+
+	See https://lists.gnu.org/archive/html/bison-patches/2013-02/msg00106.html.
+
+	* src/conflicts.c (rule_has_state_rr_conflicts): Rename as...
+	(count_rule_state_sr_conflicts): this.
+	DWIM.
+	(count_rule_rr_conflicts): Adjust.
+	* tests/conflicts.at (%expect-rr in grammar rules)
+	(%expect-rr too much in grammar rules)
+	(%expect-rr not enough in grammar rules): New.
+
+2018-11-22  Akim Demaille  <akim.demaille@gmail.com>
+
+	%expect-rr: fix the computation of the overall number of conflicts
+	On a grammar such as
+
+	   exp: "num" | "num" | "num"
+
+	we currently report only one RR conflict, instead of two.
+
+	This bug is present since the origins of Bison
+
+	    commit 08089d5d35ece0c7d41659cc1bc09638e2abb151
+	    Author: David MacKenzie <djm@djmnet.org>
+	    Date:   Tue Apr 20 05:42:52 1993 +0000
+
+	       Initial revision
+
+	and was preserved in
+
+	    commit 676385e29c4aedfc05d20daf1ef20cd4ccc84856
+	    Author: Paul Hilfinger <Hilfinger@CS.Berkeley.EDU>
+	    Date:   Fri Jun 28 02:26:44 2002 +0000
+
+	       Initial check-in introducing experimental GLR parsing.  See entry in
+	       ChangeLog dated 2002-06-27 from Paul Hilfinger for details.
+
+	See
+	https://lists.gnu.org/archive/html/bison-patches/2018-11/msg00011.html
+
+	* src/conflicts.h, src/conflicts.c (count_state_rr_conflicts)
+	(count_rr_conflicts): Use only the correct count of conflicts.
+	* tests/glr-regression.at: Fix expectations.
+
 2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
 
-	maint: post-release administrivia
-	* NEWS: Add header line for next release.
-	* .prev-version: Record previous version.
-	* cfg.mk (old_NEWS_hash): Auto-update.
+	tests: generate *.output files
+	* tests/glr-regression.at: here.
 
 2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
 
-	version 3.2.2
-	* NEWS: Record release date.
+	%expect: tune the number of conflicts per rule
+	Currently on a grammar such as
+
+	    exp: "number" | exp "+" exp | exp "*" exp
+
+	we count only one sr-conflict for both binary rules, i.e., we expect:
+
+	    exp: "number" | exp "+" exp  %expect 1 | exp "*" exp  %expect 1
+
+	although there are 4 conflicts in total.  That's because in the states
+	in conflict, for instance that for the "+" rule:
+
+	    State 6
+
+	        2 exp: exp . "+" exp
+	        2    | exp "+" exp .  [$end, "+", "*"]
+	        3    | exp . "*" exp
+
+	        "+"  shift, and go to state 4
+	        "*"  shift, and go to state 5
+
+	        "+"       [reduce using rule 2 (exp)]
+	        "*"       [reduce using rule 2 (exp)]
+	        $default  reduce using rule 2 (exp)
+
+	we count only a single conflict, although there are two (one on "+"
+	and another with "*").
+
+	See https://lists.gnu.org/archive/html/bison-patches/2013-02/msg00106.html.
+
+	* src/conflicts.c (rule_has_state_sr_conflicts): Rename as...
+	(count_rule_state_sr_conflicts): this.
+	DWIM.
+	(count_rule_sr_conflicts): Adjust.
+	* tests/conflicts.at (%expect in grammar rules): New.
 
 2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
 
-	examples: remove useless includes
-	* examples/c++/variant-11.yy, examples/c++/variant.yy: here.
-	Fix warning when storing a long into an int.
+	regen
+
+2018-11-21  Akim Demaille  <akim@lrde.epita.fr>
+
+	style: reduce scopes
+	* src/conflicts.c, src/reader.c: Minor style changes.
+
+2018-11-21  Paul Hilfinger  <hilfingr@eecs.berkeley.edu>
+
+	allow %expect and %expect-rr modifiers on individual rules
+	This change allows one to document (and check) which rules participate
+	in shift/reduce and reduce/reduce conflicts.  This is particularly
+	important GLR parsers, where conflicts are a normal occurrence.  For
+	example,
+
+	    %glr-parser
+	    %expect 1
+	    %%
+
+	    ...
+
+	    argument_list:
+	      arguments %expect 1
+	    | arguments ','
+	    | %empty
+	    ;
+
+	    arguments:
+	      expression
+	    | argument_list ',' expression
+	    ;
+
+	    ...
+
+	Looking at the output from -v, one can see that the shift-reduce
+	conflict here is due to the fact that the parser does not know whether
+	to reduce arguments to argument_list until it sees the token AFTER the
+	following ','.  By marking the rule with %expect 1 (because there is a
+	conflict in one state), we document the source of the 1 overall shift-
+	reduce conflict.
+
+	In GLR parsers, we can use %expect-rr in a rule for reduce/reduce
+	conflicts.  In this case, we mark each of the conflicting rules.  For
+	example,
+
+	    %glr-parser
+	    %expect-rr 1
+
+	    %%
+
+	    stmt:
+	      target_list '=' expr ';'
+	    | expr_list ';'
+	    ;
+
+	    target_list:
+	      target
+	    | target ',' target_list
+	    ;
+
+	    target:
+	      ID %expect-rr 1
+	    ;
+
+	    expr_list:
+	      expr
+	    | expr ',' expr_list
+	    ;
+
+	    expr:
+	      ID %expect-rr 1
+	    | ...
+	    ;
+
+	In a statement such as
+
+	    x, y = 3, 4;
+
+	the parser must reduce x to a target or an expr, but does not know
+	which until it sees the '='.  So we notate the two possible reductions
+	to indicate that each conflicts in one rule.
+
+	See https://lists.gnu.org/archive/html/bison-patches/2013-02/msg00105.html.
+
+	* doc/bison.texi (Suppressing Conflict Warnings): Document %expect,
+	%expect-rr in grammar rules.
+	* src/conflicts.c (count_state_rr_conflicts): Adjust comment.
+	(rule_has_state_sr_conflicts): New static function.
+	(count_rule_sr_conflicts): New static function.
+	(rule_nast_state_rr_conflicts): New static function.
+	(count_rule_rr_conflicts): New static function.
+	(rule_conflicts_print): New static function.
+	(conflicts_print): Also use rule_conflicts_print to report on individual
+	rules.
+	* src/gram.h (struct rule): Add new fields expected_sr_conflicts,
+	expected_rr_conflicts.
+	* src/reader.c (grammar_midrule_action): Transfer expected_sr_conflicts,
+	expected_rr_conflicts to new rule, and turn off in current_rule.
+	(grammar_current_rule_expect_sr): New function.
+	(grammar_current_rule_expect_rr): New function.
+	(packgram): Transfer expected_sr_conflicts, expected_rr_conflicts
+	to new rule.
+	* src/reader.h (grammar_current_rule_expect_sr): New function.
+	(grammar_current_rule_expect_rr): New function.
+	* src/symlist.c (symbol_list_sym_new): Initialize expected_sr_conflicts,
+	expected_rr_conflicts.
+	* src/symlist.h (struct symbol_list): Add new fields expected_sr_conflicts,
+	expected_rr_conflicts.
+	* tests/conflicts.at: Add tests "%expect in grammar rule not enough",
+	"%expect in grammar rule right.", "%expect in grammar rule too much."
+
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: update
 
 2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
 
 	gnulib: update
 
+2018-11-21  Akim Demaille  <akim.demaille@gmail.com>
+
+	remove ancient lint directives
+	* data/c++.m4, data/yacc.c: Remove surprising remains of lint
+	directives.
+
+2018-11-21  Jannick  <thirdedition@gmx.net>
+
+	doc: calc++: remove ancient fix for flex
+	* doc/bison.texi (Calc++ Scanner): Remove fix for Flex 2.5.31-2.5.33.
+
+2018-11-21  Jannick  <thirdedition@gmx.net>
+
+	doc: calc++: ignore \r in the scaner
+	* doc/bison.texi (Calc++ Scanner): Ignore \r.
+
 2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
 
-	NEWS: update
+	style: harmonize the labels of yyparse
+	* data/glr.c, data/lalr1.cc, data/yacc.c: Fix indentation and
+	other formatting issues.
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: avoid lengthy actions
+	We also lack a consistent naming for directive implementations.
+	`directive_skeleton` is too long, `percent_skeleton` is not very nice
+	looking, `process_skeleton` looks ambiguous, `do_skeleton` is somewhat
+	ambiguous too, but seems a better track.
+
+	* src/parse-gram.y (version_check): Rename as...
+	(do_require): this.
+	(do_skeleton): New.
+	Use it.
 
 2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
 
@@ -114,7 +2252,19 @@
 	(b4_basic_symbol_constructor_define): Don't use macro on user types.
 	* tests/types.at: Check that we support pairs.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	README: update
+
+2018-11-16  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: remove duplicate definition
+	Probably imported by 6d58c632025cb6928a90e4176577982bfb9c3981, a merge
+	commit.
+
+	* tests/atlocal.in (POSIXLY_CORRECT_IS_EXPORTED): Define it once.
+
+2018-11-16  Akim Demaille  <akim.demaille@gmail.com>
 
 	glr.c: fix use of _Noreturn
 	In C++, [[noreturn]] must not be between "static" and the rest of the
@@ -130,7 +2280,7 @@
 
 	* data/glr.c (yyFail, yyMemoryExhausted): here.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-16  Akim Demaille  <akim.demaille@gmail.com>
 
 	tests: run the api.value.type tests for all C++ standards
 	* tests/local.at (AT_LANG_FOR_EACH_STD): New.
@@ -139,7 +2289,7 @@
 	Accept an argument for what to do when the requirement is not met.
 	* tests/types.at (api.value.type): Check all the C++ stds.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-16  Akim Demaille  <akim.demaille@gmail.com>
 
 	CI: split the ASAN job in two
 	The following commit introduce even more compilations/runs than
@@ -147,24 +2297,74 @@
 
 	* .travis.yml (Clang 7 libc++ and ASAN): Split in two.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-14  Akim Demaille  <akim.demaille@gmail.com>
 
 	c++: use YY_CPLUSPLUS
 	* data/c++.m4: here.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-13  Akim Demaille  <akim.demaille@gmail.com>
 
 	c++: factor the handling of __cplusplus into YY_CPLUSPLUS
 	* data/c++.m4 (b4_cxx_portability): Define it.
 	Use it.
 	* data/lalr1.cc, data/variant.hh: Use it.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-13  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: formatting changes
+	* src/scan-gram.l: here.
+
+2018-11-13  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: clarify some magic constant
+	* tests/c++.at (C++ Variant-based Symbols Unit Tests): here.
+
+2018-11-13  Akim Demaille  <akim.demaille@gmail.com>
+
+	examples: remove useless includes
+	* examples/c++/variant-11.yy, examples/c++/variant.yy: here.
+	Fix warning when storing a long into an int.
+
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
 
 	tests: compile the C++ examples with warnings
 	* examples/c++/local.mk: Pass $(WARN_CXXFLAGS_TEST).
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: deprecate %error-verbose
+	It is unfortunate that %error_verbose was properly diagnosed as
+	obsoleted by "%define parse.error verbose", but %error-verbose was
+	not.
+
+	* src/parse-gram.y (%error-verbose): Remove support.
+	* src/scan-gram.l: Do it here instead, with a warning.
+	* tests/input.at (Deprecated directives): Check it.
+
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	tests: migrate from %error-verbose to %define parse.error verbose
+	* tests/actions.at, tests/c++.at, tests/conflicts.at,
+	* tests/cxx-type.at, tests/existing.at, tests/glr-regression.at,
+	* tests/headers.at, tests/input.at, tests/java.at, tests/javapush.at,
+	* tests/local.at, tests/regression.at, tests/skeletons.at,
+	* tests/torture.at:
+	Here.
+
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
+
+	parser: deprecate %nterm
+	It has several weaknesses.
+	Reported by Rici Lake.
+	http://lists.gnu.org/archive/html/bug-bison/2018-10/msg00000.html
+
+	* src/scan-gram.l: here.
+
+2018-11-12  Akim Demaille  <akim.demaille@gmail.com>
 
 	tests: fix syncline tests
 	These tests are skipped with GCC:
@@ -176,7 +2376,69 @@
 	* tests/synclines.at: Stop writing C++ in C.
 	* tests/local.at: Formatting changes.
 
-2018-11-20  Akim Demaille  <akim.demaille@gmail.com>
+2018-11-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: expected features of Bison 3.3
+
+2018-11-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	yacc: reduce scope in push mode
+	* data/yacc.c (yypull_parse): Here.
+
+2018-11-11  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: comment changes
+	* data/c++.m4, data/glr.c, data/lalr1.java, data/yacc.c
+	(yytranslate, YYTRANSLATE): Harmonize comments.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	c++: simplify a default construction
+	* data/lalr1.cc (yytnamerr_): here.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	regen
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	reader: no longer accept %define variable names in quotes
+	It was never documented.
+
+	* src/parse-gram.y (variable): Here.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	dogfooding: use api.value.type union
+	* src/parse-gram.y (api.value.type): Set to union.
+	Replace occurrences of %union with explicit %types.
+	* src/scan-gram.l: Adjust yylval's field names.
+	(RETURN_VALUE): No longer needs the Field argument.
+	Use it more.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	djgpp: remove
+	Support for DJGPP was announced to be removed in the NEWS of Bison
+	3.1 (2018-08-27) unless someone expressed interest.  There was no answer.
+
+	* djgpp: Remove.
+	* NEWS, Makefile.am, cfg.mk, po/POTFILES.in: Adjust.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	scanner: simplify use of gettext
+	* src/scan-gram.l (unexpected_end): Leave the actual call to gettext
+	to the caller.
+
+2018-11-10  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: clean up the scanner and parser
+	* src/scan-gram.l: Formatting changes.
+	Add "missing" assertion for symmetry.
+	* src/parse-gram.y: Formatting changes.
+
+2018-11-09  Akim Demaille  <akim.demaille@gmail.com>
 
 	maint: post-release administrivia
 	* NEWS: Add header line for next release.

@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
 Name     : bison
-Version  : 3.2.4
-Release  : 31
-URL      : https://mirrors.kernel.org/gnu/bison/bison-3.2.4.tar.xz
-Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.2.4.tar.xz
-Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.2.4.tar.xz.sig
+Version  : 3.3.1
+Release  : 32
+URL      : https://mirrors.kernel.org/gnu/bison/bison-3.3.1.tar.xz
+Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.3.1.tar.xz
+Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.3.1.tar.xz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -28,8 +28,7 @@ BuildRequires : valgrind
 This package contains the GNU Bison parser generator.
 * Installation
 ** Build
-See the file INSTALL for generic compilation and installation
-instructions.
+See the file INSTALL for generic compilation and installation instructions.
 
 %package bin
 Summary: bin components for the bison package.
@@ -95,14 +94,14 @@ man components for the bison package.
 
 
 %prep
-%setup -q -n bison-3.2.4
+%setup -q -n bison-3.3.1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1545867038
+export SOURCE_DATE_EPOCH=1548690797
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -114,7 +113,7 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1545867038
+export SOURCE_DATE_EPOCH=1548690797
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
 cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
@@ -133,28 +132,32 @@ cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
 %files data
 %defattr(-,root,root,-)
 /usr/share/bison/README
-/usr/share/bison/bison.m4
-/usr/share/bison/c++-skel.m4
-/usr/share/bison/c++.m4
-/usr/share/bison/c-like.m4
-/usr/share/bison/c-skel.m4
-/usr/share/bison/c.m4
-/usr/share/bison/glr.c
-/usr/share/bison/glr.cc
-/usr/share/bison/java-skel.m4
-/usr/share/bison/java.m4
-/usr/share/bison/lalr1.cc
-/usr/share/bison/lalr1.java
-/usr/share/bison/location.cc
 /usr/share/bison/m4sugar/foreach.m4
 /usr/share/bison/m4sugar/m4sugar.m4
-/usr/share/bison/stack.hh
-/usr/share/bison/variant.hh
+/usr/share/bison/skeletons/README-D.txt
+/usr/share/bison/skeletons/bison.m4
+/usr/share/bison/skeletons/c++-skel.m4
+/usr/share/bison/skeletons/c++.m4
+/usr/share/bison/skeletons/c-like.m4
+/usr/share/bison/skeletons/c-skel.m4
+/usr/share/bison/skeletons/c.m4
+/usr/share/bison/skeletons/d-skel.m4
+/usr/share/bison/skeletons/d.m4
+/usr/share/bison/skeletons/glr.c
+/usr/share/bison/skeletons/glr.cc
+/usr/share/bison/skeletons/java-skel.m4
+/usr/share/bison/skeletons/java.m4
+/usr/share/bison/skeletons/lalr1.cc
+/usr/share/bison/skeletons/lalr1.d
+/usr/share/bison/skeletons/lalr1.java
+/usr/share/bison/skeletons/location.cc
+/usr/share/bison/skeletons/stack.hh
+/usr/share/bison/skeletons/variant.hh
+/usr/share/bison/skeletons/yacc.c
 /usr/share/bison/xslt/bison.xsl
 /usr/share/bison/xslt/xml2dot.xsl
 /usr/share/bison/xslt/xml2text.xsl
 /usr/share/bison/xslt/xml2xhtml.xsl
-/usr/share/bison/yacc.c
 
 %files dev
 %defattr(-,root,root,-)
