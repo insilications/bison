@@ -21,6 +21,7 @@ compat-mariadb-soname18
 conntrack-tools
 cpio
 cscope
+ddd
 debugedit
 doxygen
 dtc
@@ -79,7 +80,6 @@ linux-hyperv-lts
 linux-hyperv-mini
 linux-kata
 linux-libc-headers
-linux-lts
 linux-oracle
 linux-pk414
 linux-tools
@@ -110,6 +110,7 @@ raptor2
 rasqal
 re2c
 rpm
+rsyslog
 ruby
 sharutils
 sof-crosstool-ng
@@ -126,6 +127,7 @@ vala
 vlc
 webkitgtk
 weechat
+wine
 wireshark
 wol
 xkbcomp

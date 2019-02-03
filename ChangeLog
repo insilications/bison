@@ -1,3 +1,78 @@
+2019-02-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	version 3.3.2
+	* NEWS: Record release date.
+
+2019-02-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: minor fixes
+	* NEWS, src/reduce.c, src/reduce.h: Use 'nonterminal'.
+	Fix comments.
+
+2019-02-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	NEWS: named constructors are preferable to symbol_type ctors
+	Reported by Frank Heckenbach.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00043.html
+
+2019-02-03  Akim Demaille  <akim.demaille@gmail.com>
+
+	gram: fix handling of nterms in actions when some are unused
+	Since Bison 3.3, semantic values in rule actions (i.e., '$...') are
+	passed to the m4 backend as the symbol number.  Unfortunately, when
+	there are unused symbols, the symbols are renumbered _after_ the
+	numbers were used in the rule actions.  As a result, the evaluation of
+	the skeleton failed because it used non existing symbol numbers.
+	Which is the happy scenario: we could use numbers of other existing
+	symbols...
+
+	Reported by Balázs Scheidler.
+	http://lists.gnu.org/archive/html/bug-bison/2019-01/msg00044.html
+
+	Translating the rule actions after the symbol renumbering moves too
+	many parts in bison.  Relying on the symbol identifiers is more
+	troublesome than it might first seem: some don't have an
+	identifier (tokens with only a literal string), some might have a
+	complex one (tokens with a literal string with characters special for
+	M4).  Well, these are tokens, but nterms also have issues: "dummy"
+	nterms (for midrule actions) are named $@32 etc. which is risky for
+	M4.
+
+	Instead, let's simply give M4 the mapping between the old numbers and
+	the new ones.  To avoid confusion between old and new numbers, always
+	emit pre-renumbering numbers as "orig NUM".
+
+	* data/README: Give details about "orig NUM".
+	* data/skeletons/bison.m4 (__b4_symbol, _b4_symbol): Resolve the
+	"orig NUM".
+	* src/output.c (prepare_symbol_definitions): Pass nterm_map to m4.
+	* src/reduce.h, src/reduce.c (nterm_map): Extract it from
+	nonterminals_reduce, to make it public.
+	(reduce_free): Free it.
+	* src/scan-code.l (handle_action_dollar): When referring to a nterm,
+	use "orig NUM".
+	* tests/reduce.at (Useless Parts): New, based Balázs Scheidler's
+	report.
+
+2019-02-02  Akim Demaille  <akim.demaille@gmail.com>
+
+	style: rename local variable
+	* src/reduce.c (nonterminals_reduce): Rename nontermmap as nterm_map.
+	We will expose it.
+
+2019-01-28  Akim Demaille  <akim.demaille@gmail.com>
+
+	CI: update the ICC serial number for travis-ci.org
+	On travis-ci.org, there are five concurrent slaves, instead of three
+	on travis-ci.com.
+
+2019-01-27  Akim Demaille  <akim.demaille@gmail.com>
+
+	maint: post-release administrivia
+	* NEWS: Add header line for next release.
+	* .prev-version: Record previous version.
+	* cfg.mk (old_NEWS_hash): Auto-update.
+
 2019-01-27  Akim Demaille  <akim.demaille@gmail.com>
 
 	version 3.3.1
