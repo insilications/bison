@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
 Name     : bison
-Version  : 3.3.2
-Release  : 33
-URL      : https://mirrors.kernel.org/gnu/bison/bison-3.3.2.tar.xz
-Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.3.2.tar.xz
-Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.3.2.tar.xz.sig
+Version  : 3.4
+Release  : 34
+URL      : https://mirrors.kernel.org/gnu/bison/bison-3.4.tar.xz
+Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.4.tar.xz
+Source99 : https://mirrors.kernel.org/gnu/bison/bison-3.4.tar.xz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -25,17 +25,17 @@ BuildRequires : libxslt-bin
 BuildRequires : valgrind
 
 %description
-This package contains the GNU Bison parser generator.
-* Installation
-** Build
-See the file INSTALL for generic compilation and installation instructions.
+# reccalc - recursive calculator with Flex and Bison
+In this example the generated parser is pure and reentrant: it can be used
+concurrently in different threads, or recursively.  As a proof of this
+reentrancy, expressions in parenthesis are tokenized as strings, and then
+recursively parsed from the parser:
 
 %package bin
 Summary: bin components for the bison package.
 Group: Binaries
 Requires: bison-data = %{version}-%{release}
 Requires: bison-license = %{version}-%{release}
-Requires: bison-man = %{version}-%{release}
 
 %description bin
 bin components for the bison package.
@@ -55,6 +55,8 @@ Group: Development
 Requires: bison-bin = %{version}-%{release}
 Requires: bison-data = %{version}-%{release}
 Provides: bison-devel = %{version}-%{release}
+Requires: bison = %{version}-%{release}
+Requires: bison = %{version}-%{release}
 
 %description dev
 dev components for the bison package.
@@ -94,14 +96,21 @@ man components for the bison package.
 
 
 %prep
-%setup -q -n bison-3.3.2
+%setup -q -n bison-3.4
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C
-export SOURCE_DATE_EPOCH=1549212446
+export SOURCE_DATE_EPOCH=1558300394
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %configure --disable-static
 make  %{?_smp_mflags}
 
@@ -113,11 +122,12 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1549212446
+export SOURCE_DATE_EPOCH=1558300394
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
 cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
 %make_install
+%find_lang bison-gnulib
 %find_lang bison-runtime
 %find_lang bison
 
@@ -131,7 +141,8 @@ cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
 
 %files data
 %defattr(-,root,root,-)
-/usr/share/bison/README
+/usr/share/bison/README.md
+/usr/share/bison/bison-default.css
 /usr/share/bison/m4sugar/foreach.m4
 /usr/share/bison/m4sugar/m4sugar.m4
 /usr/share/bison/skeletons/README-D.txt
@@ -177,6 +188,6 @@ cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
 /usr/share/man/man1/bison.1
 /usr/share/man/man1/yacc.1
 
-%files locales -f bison-runtime.lang -f bison.lang
+%files locales -f bison-gnulib.lang -f bison-runtime.lang -f bison.lang
 %defattr(-,root,root,-)
 

@@ -1,4 +1,5 @@
 # This file contains recursive sources that require this package
+JAGS
 OpenSP
 QGIS
 R
@@ -27,11 +28,14 @@ doxygen
 dtc
 e2fsprogs
 elfutils
+fetchmail
 fio
 flatpak
 flex
 gawk
 gcc
+gcc7
+gcc8
 gdb
 gdbm
 gettext
@@ -43,6 +47,7 @@ gmp
 gnutls
 go
 gobject-introspection
+gpm
 graphviz
 grass
 groff
@@ -73,15 +78,7 @@ libsmi
 libtasn1
 libvma
 libxkbcommon
-linux-container
-linux-gce
-linux-hyperv
-linux-hyperv-lts
-linux-hyperv-mini
-linux-kata
 linux-libc-headers
-linux-oracle
-linux-pk414
 linux-tools
 lm-sensors
 ltp
@@ -103,6 +100,7 @@ php
 postgresql
 python-rpm-legacypython
 qemu
+qemu-guest-additions
 qemu-lite
 qtwebengine
 radvd
@@ -111,7 +109,6 @@ rasqal
 re2c
 rpm
 rsyslog
-ruby
 sharutils
 sof-crosstool-ng
 sof-newlib-xtensa
@@ -119,8 +116,10 @@ source-highlight
 sudo
 swig
 tar
+template-glib
 texlive
 tiptop
+udunits
 unixODBC
 util-linux
 vala
