@@ -4,6 +4,7 @@ OpenSP
 QGIS
 R
 acpica-unix2
+aria2
 at
 augeas
 autofs
@@ -97,6 +98,7 @@ otp
 pdns
 perl
 php
+postgis
 postgresql
 python-rpm-legacypython
 qemu
