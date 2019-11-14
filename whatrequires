@@ -18,7 +18,9 @@ bison
 bro
 cgdb
 clamav
+collectd
 comedilib
+compat-gdbm-soname4
 compat-iptables-soname0.1.0
 compat-mariadb-soname18
 conntrack-tools
@@ -40,6 +42,7 @@ gcc7
 gcc8
 gdb
 gdbm
+gengetopt
 gettext
 gftp
 glibc
@@ -53,7 +56,6 @@ gpm
 graphviz
 grass
 groff
-grub
 gstreamer
 gutenprint
 hunspell
@@ -76,6 +78,7 @@ libmediaart
 libnl
 libpcap
 libreoffice
+libreswan
 libsmi
 libtasn1
 libvma
@@ -84,6 +87,7 @@ linux-libc-headers
 linux-tools
 lm-sensors
 ltp
+lttng-tools
 lynx
 m17n-lib
 mariadb
@@ -107,7 +111,6 @@ php
 postgis
 postgresql
 postgresql11
-python-rpm-legacypython
 qemu
 qemu-guest-additions
 qtwebengine
@@ -118,7 +121,6 @@ re2c
 rofi
 rpm
 rsyslog
-ruby
 shadow
 sharutils
 source-highlight
@@ -128,6 +130,7 @@ tar
 template-glib
 texlive
 thrift
+tigervnc
 tiptop
 udunits
 unixODBC

@@ -6,7 +6,7 @@
 #
 Name     : bison
 Version  : 3.4.2
-Release  : 36
+Release  : 37
 URL      : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz
 Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz
 Source1 : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz.sig
@@ -15,6 +15,7 @@ Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
 Requires: bison-bin = %{version}-%{release}
 Requires: bison-data = %{version}-%{release}
+Requires: bison-info = %{version}-%{release}
 Requires: bison-license = %{version}-%{release}
 Requires: bison-locales = %{version}-%{release}
 Requires: bison-man = %{version}-%{release}
@@ -25,11 +26,10 @@ BuildRequires : libxslt-bin
 BuildRequires : valgrind
 
 %description
-# reccalc - recursive calculator with Flex and Bison
-In this example the generated parser is pure and reentrant: it can be used
-concurrently in different threads, or recursively.  As a proof of this
-reentrancy, expressions in parenthesis are tokenized as strings, and then
-recursively parsed from the parser:
+This package contains the GNU Bison parser generator.
+* Installation
+** Build from git
+Here are basic installation instructions for a repository checkout:
 
 %package bin
 Summary: bin components for the bison package.
@@ -56,7 +56,6 @@ Requires: bison-bin = %{version}-%{release}
 Requires: bison-data = %{version}-%{release}
 Provides: bison-devel = %{version}-%{release}
 Requires: bison = %{version}-%{release}
-Requires: bison = %{version}-%{release}
 
 %description dev
 dev components for the bison package.
@@ -66,9 +65,18 @@ dev components for the bison package.
 Summary: doc components for the bison package.
 Group: Documentation
 Requires: bison-man = %{version}-%{release}
+Requires: bison-info = %{version}-%{release}
 
 %description doc
 doc components for the bison package.
+
+
+%package info
+Summary: info components for the bison package.
+Group: Default
+
+%description info
+info components for the bison package.
 
 
 %package license
@@ -97,14 +105,14 @@ man components for the bison package.
 
 %prep
 %setup -q -n bison-3.4.2
+cd %{_builddir}/bison-3.4.2
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1568384114
-# -Werror is for werrorists
+export SOURCE_DATE_EPOCH=1573771273
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -124,10 +132,10 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make VERBOSE=1 V=1 %{?_smp_mflags} check || :
 
 %install
-export SOURCE_DATE_EPOCH=1568384114
+export SOURCE_DATE_EPOCH=1573771273
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
-cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
+cp %{_builddir}/bison-3.4.2/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
 %make_install
 %find_lang bison-gnulib
 %find_lang bison-runtime
@@ -179,11 +187,14 @@ cp COPYING %{buildroot}/usr/share/package-licenses/bison/COPYING
 %files doc
 %defattr(0644,root,root,0755)
 %doc /usr/share/doc/bison/*
-%doc /usr/share/info/*
+
+%files info
+%defattr(0644,root,root,0755)
+/usr/share/info/bison.info
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/bison/COPYING
+/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
 
 %files man
 %defattr(0644,root,root,0755)
