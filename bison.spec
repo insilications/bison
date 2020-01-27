@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
 Name     : bison
-Version  : 3.4.2
-Release  : 37
-URL      : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz
-Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz
-Source1 : https://mirrors.kernel.org/gnu/bison/bison-3.4.2.tar.xz.sig
+Version  : 3.5.1
+Release  : 39
+URL      : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz
+Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz
+Source1  : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -27,8 +27,8 @@ BuildRequires : valgrind
 
 %description
 This package contains the GNU Bison parser generator.
-* Installation
-** Build from git
+# Installation
+## Build from git
 Here are basic installation instructions for a repository checkout:
 
 %package bin
@@ -104,15 +104,15 @@ man components for the bison package.
 
 
 %prep
-%setup -q -n bison-3.4.2
-cd %{_builddir}/bison-3.4.2
+%setup -q -n bison-3.5.1
+cd %{_builddir}/bison-3.5.1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1573771273
+export SOURCE_DATE_EPOCH=1580157249
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -129,13 +129,13 @@ export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-make VERBOSE=1 V=1 %{?_smp_mflags} check || :
+make VERBOSE=1 V=1 %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1573771273
+export SOURCE_DATE_EPOCH=1580157249
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
-cp %{_builddir}/bison-3.4.2/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
+cp %{_builddir}/bison-3.5.1/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
 %make_install
 %find_lang bison-gnulib
 %find_lang bison-runtime

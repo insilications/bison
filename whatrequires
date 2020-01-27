@@ -27,7 +27,6 @@ conntrack-tools
 cpio
 cscope
 ddd
-debugedit
 doxygen
 dtc
 e2fsprogs
@@ -70,8 +69,6 @@ lftp
 libcgroup
 libconfig
 libgfortran-avx
-libgfortran-compat-soname3
-libgfortran-compat-soname4
 libgphoto2
 libksba
 libmediaart
@@ -132,6 +129,7 @@ texlive
 thrift
 tigervnc
 tiptop
+tmux
 udunits
 unixODBC
 util-linux
