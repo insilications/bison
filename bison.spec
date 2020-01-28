@@ -6,7 +6,7 @@
 #
 Name     : bison
 Version  : 3.5.1
-Release  : 39
+Release  : 40
 URL      : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz
 Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz
 Source1  : https://mirrors.kernel.org/gnu/bison/bison-3.5.1.tar.xz.sig
@@ -112,7 +112,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1580157249
+export SOURCE_DATE_EPOCH=1580239252
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
@@ -129,10 +129,11 @@ export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-make VERBOSE=1 V=1 %{?_smp_mflags} check
+# test suite is not parallel-safe
+make check
 
 %install
-export SOURCE_DATE_EPOCH=1580157249
+export SOURCE_DATE_EPOCH=1580239252
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
 cp %{_builddir}/bison-3.5.1/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
