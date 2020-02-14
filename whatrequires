@@ -108,6 +108,7 @@ php
 postgis
 postgresql
 postgresql11
+postgresql12
 qemu
 qemu-guest-additions
 qtwebengine
