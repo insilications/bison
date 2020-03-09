@@ -1,6 +1,7 @@
 # This file contains recursive sources that require this package
 JAGS
 OpenSP
+Pacemaker
 QGIS
 R
 acpica-unix2
@@ -35,6 +36,7 @@ fetchmail
 fio
 flatpak
 flex
+g2fs-utils
 gawk
 gcc
 gcc7
@@ -72,6 +74,7 @@ libgfortran-avx
 libgphoto2
 libksba
 libmediaart
+libmemcached
 libnl
 libpcap
 libreoffice
@@ -119,6 +122,7 @@ re2c
 rofi
 rpm
 rsyslog
+ruby
 shadow
 sharutils
 source-highlight
