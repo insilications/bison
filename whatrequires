@@ -25,6 +25,7 @@ compat-gdbm-soname4
 compat-iptables-soname0.1.0
 compat-mariadb-soname18
 conntrack-tools
+coreutils
 cpio
 cscope
 ddd
@@ -70,7 +71,6 @@ krb5
 lftp
 libcgroup
 libconfig
-libgfortran-avx
 libgphoto2
 libksba
 libmediaart

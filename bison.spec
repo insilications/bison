@@ -5,11 +5,11 @@
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
 Name     : bison
-Version  : 3.5.3
-Release  : 42
-URL      : https://mirrors.kernel.org/gnu/bison/bison-3.5.3.tar.xz
-Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.5.3.tar.xz
-Source1  : https://mirrors.kernel.org/gnu/bison/bison-3.5.3.tar.xz.sig
+Version  : 3.5.4
+Release  : 43
+URL      : https://mirrors.kernel.org/gnu/bison/bison-3.5.4.tar.xz
+Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.5.4.tar.xz
+Source1  : https://mirrors.kernel.org/gnu/bison/bison-3.5.4.tar.xz.sig
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-3.0 GPL-3.0+
@@ -26,10 +26,12 @@ BuildRequires : libxslt-bin
 BuildRequires : valgrind
 
 %description
-This package contains the GNU Bison parser generator.
-# Installation
-## Build from git
-Here are basic installation instructions for a repository checkout:
+GNU Bison is a general-purpose parser generator that converts an annotated
+context-free grammar into a deterministic LR or generalized LR (GLR) parser
+employing LALR(1) parser tables.  Bison can also generate IELR(1) or
+canonical LR(1) parser tables.  Once you are proficient with Bison, you can
+use it to develop a wide range of language parsers, from those used in
+simple desk calculators to complex programming languages.
 
 %package bin
 Summary: bin components for the bison package.
@@ -104,22 +106,22 @@ man components for the bison package.
 
 
 %prep
-%setup -q -n bison-3.5.3
-cd %{_builddir}/bison-3.5.3
+%setup -q -n bison-3.5.4
+cd %{_builddir}/bison-3.5.4
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1583790622
+export SOURCE_DATE_EPOCH=1586195464
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
 export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
 export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %configure --disable-static
 make  %{?_smp_mflags}
@@ -133,10 +135,10 @@ export no_proxy=localhost,127.0.0.1,0.0.0.0
 make check
 
 %install
-export SOURCE_DATE_EPOCH=1583790622
+export SOURCE_DATE_EPOCH=1586195464
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/bison
-cp %{_builddir}/bison-3.5.3/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
+cp %{_builddir}/bison-3.5.4/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
 %make_install
 %find_lang bison-gnulib
 %find_lang bison-runtime
