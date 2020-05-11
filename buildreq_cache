@@ -1,6 +1,7 @@
-3.5.4
+3.6.1
 bison
 flex
 glibc-locale
 libxslt-bin
+readline-dev
 valgrind
