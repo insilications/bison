@@ -42,6 +42,7 @@ gawk
 gcc
 gcc7
 gcc8
+gcc9
 gdb
 gdbm
 gengetopt
