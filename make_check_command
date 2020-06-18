@@ -1,2 +1,2 @@
 # test suite is not parallel-safe
-make check
+make VERBOSE=1 V=1 check || :

@@ -4,9 +4,10 @@
 #
 # Source0 file verified with key 0x0DDCAA3278D5264E (akim@gnu.org)
 #
+%define keepstatic 1
 Name     : bison
 Version  : 3.6.3
-Release  : 46
+Release  : 49
 URL      : https://mirrors.kernel.org/gnu/bison/bison-3.6.3.tar.xz
 Source0  : https://mirrors.kernel.org/gnu/bison/bison-3.6.3.tar.xz
 Source1  : https://mirrors.kernel.org/gnu/bison/bison-3.6.3.tar.xz.sig
@@ -16,15 +17,18 @@ License  : GPL-3.0 GPL-3.0+
 Requires: bison-bin = %{version}-%{release}
 Requires: bison-data = %{version}-%{release}
 Requires: bison-info = %{version}-%{release}
-Requires: bison-license = %{version}-%{release}
 Requires: bison-locales = %{version}-%{release}
 Requires: bison-man = %{version}-%{release}
 BuildRequires : bison
+BuildRequires : buildreq-configure
 BuildRequires : flex
 BuildRequires : glibc-locale
 BuildRequires : libxslt-bin
 BuildRequires : readline-dev
 BuildRequires : valgrind
+# Suppress stripping binaries
+%define __strip /bin/true
+%define debug_package %{nil}
 
 %description
 GNU Bison is a general-purpose parser generator that converts an annotated
@@ -38,7 +42,6 @@ simple desk calculators to complex programming languages.
 Summary: bin components for the bison package.
 Group: Binaries
 Requires: bison-data = %{version}-%{release}
-Requires: bison-license = %{version}-%{release}
 
 %description bin
 bin components for the bison package.
@@ -82,14 +85,6 @@ Group: Default
 info components for the bison package.
 
 
-%package license
-Summary: license components for the bison package.
-Group: Default
-
-%description license
-license components for the bison package.
-
-
 %package locales
 Summary: locales components for the bison package.
 Group: Default
@@ -106,40 +101,100 @@ Group: Default
 man components for the bison package.
 
 
+%package staticdev
+Summary: staticdev components for the bison package.
+Group: Default
+Requires: bison-dev = %{version}-%{release}
+
+%description staticdev
+staticdev components for the bison package.
+
+
 %prep
 %setup -q -n bison-3.6.3
 cd %{_builddir}/bison-3.6.3
 
 %build
-export http_proxy=http://127.0.0.1:9/
-export https_proxy=http://127.0.0.1:9/
-export no_proxy=localhost,127.0.0.1,0.0.0.0
+## build_prepend content
+find . -type f -name 'configure' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+#find . -type f -name 'configure.ac' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+#
+#echo "AM_MAINTAINER_MODE([disable])" >> configure.ac
+## build_prepend end
+unset http_proxy
+unset https_proxy
+unset no_proxy
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1591761463
+export SOURCE_DATE_EPOCH=1591992155
+unset LD_AS_NEEDED
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
-export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
-export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
-%configure --disable-static
-make  %{?_smp_mflags}
+## altflags1 content
+#
+## altflags1 end
+## altflags_pgo content
+## pgo generate
+export PGO_GEN="-fprofile-generate -fprofile-dir=/var/tmp/pgo -fprofile-update=atomic -fprofile-abs-path -fprofile-arcs -ftest-coverage --coverage -fprofile-partial-training"
+export CFLAGS_GENERATE="-O3 -march=native -mtune=native -falign-functions=32 -fno-semantic-interposition -fno-stack-protector -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -mtls-dialect=gnu2 -fno-math-errno -fno-trapping-math -pipe $PGO_GEN"
+export FCFLAGS_GENERATE="-O3 -march=native -mtune=native -falign-functions=32 -fno-semantic-interposition -fno-stack-protector -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -mtls-dialect=gnu2 -fno-math-errno -fno-trapping-math -pipe $PGO_GEN"
+export FFLAGS_GENERATE="-O3 -march=native -mtune=native -falign-functions=32 -fno-semantic-interposition -fno-stack-protector -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -mtls-dialect=gnu2 -fno-math-errno -fno-trapping-math -pipe $PGO_GEN"
+export CXXFLAGS_GENERATE="-O3 -march=native -mtune=native -falign-functions=32 -fno-semantic-interposition -fno-stack-protector -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -mtls-dialect=gnu2 -fno-math-errno -fno-trapping-math -fvisibility-inlines-hidden -pipe $PGO_GEN"
+export LDFLAGS_GENERATE="-O3 -march=native -mtune=native -falign-functions=32 -fno-semantic-interposition -fno-stack-protector -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -mtls-dialect=gnu2 -fno-math-errno -fno-trapping-math -pipe $PGO_GEN"
+## pgo use
+## -ffat-lto-objects -fno-PIE -fno-PIE -m64 -no-pie -fpic -fvisibility=hidden
+## gcc: -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-common -Wno-error -Wp,-D_REENTRANT
+export PGO_USE="-fprofile-use -fprofile-dir=/var/tmp/pgo -fprofile-correction -fprofile-partial-training"
+export CFLAGS_USE="-g -O3 -march=native -mtune=native -fgraphite-identity -Wall -Wl,--build-id=sha1 -Wl,--enable-new-dtags -Wl,--hash-style=gnu -Wl,-O2 -Wl,-z,now -Wl,-z,relro -falign-functions=32 -fasynchronous-unwind-tables -fdevirtualize-at-ltrans -floop-nest-optimize -fno-math-errno -fno-semantic-interposition -fno-stack-protector -fno-trapping-math -ftree-loop-distribute-patterns -ftree-loop-vectorize -ftree-vectorize -funroll-loops -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -fno-common -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-plt -mtls-dialect=gnu2 -Wl,-sort-common -Wno-error -Wp,-D_REENTRANT -pipe $PGO_USE"
+export FCFLAGS_USE="-g -O3 -march=native -mtune=native -fgraphite-identity -Wall -Wl,--build-id=sha1 -Wl,--enable-new-dtags -Wl,--hash-style=gnu -Wl,-O2 -Wl,-z,now -Wl,-z,relro -falign-functions=32 -fasynchronous-unwind-tables -fdevirtualize-at-ltrans -floop-nest-optimize -fno-math-errno -fno-semantic-interposition -fno-stack-protector -fno-trapping-math -ftree-loop-distribute-patterns -ftree-loop-vectorize -ftree-vectorize -funroll-loops -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -fno-common -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-plt -mtls-dialect=gnu2 -Wl,-sort-common -Wno-error -Wp,-D_REENTRANT -pipe $PGO_USE"
+export FFLAGS_USE="-g -O3 -march=native -mtune=native -fgraphite-identity -Wall -Wl,--build-id=sha1 -Wl,--enable-new-dtags -Wl,--hash-style=gnu -Wl,-O2 -Wl,-z,now -Wl,-z,relro -falign-functions=32 -fasynchronous-unwind-tables -fdevirtualize-at-ltrans -floop-nest-optimize -fno-math-errno -fno-semantic-interposition -fno-stack-protector -fno-trapping-math -ftree-loop-distribute-patterns -ftree-loop-vectorize -ftree-vectorize -funroll-loops -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -fno-common -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-plt -mtls-dialect=gnu2 -Wl,-sort-common -Wno-error -Wp,-D_REENTRANT -pipe $PGO_USE"
+export CXXFLAGS_USE="-g -O3 -march=native -mtune=native -fgraphite-identity -Wall -Wl,--build-id=sha1 -Wl,--enable-new-dtags -Wl,--hash-style=gnu -Wl,-O2 -Wl,-z,now -Wl,-z,relro -falign-functions=32 -fasynchronous-unwind-tables -fdevirtualize-at-ltrans -floop-nest-optimize -fno-math-errno -fno-semantic-interposition -fno-stack-protector -fno-trapping-math -ftree-loop-distribute-patterns -ftree-loop-vectorize -ftree-vectorize -funroll-loops -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -fno-common -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-plt -mtls-dialect=gnu2 -Wl,-sort-common -Wno-error -fvisibility-inlines-hidden -Wp,-D_REENTRANT -pipe $PGO_USE"
+export LDFLAGS_USE="-g -O3 -march=native -mtune=native -fgraphite-identity -Wall -Wl,--build-id=sha1 -Wl,--enable-new-dtags -Wl,--hash-style=gnu -Wl,-O2 -Wl,-z,now -Wl,-z,relro -falign-functions=32 -fasynchronous-unwind-tables -fdevirtualize-at-ltrans -floop-nest-optimize -fno-math-errno -fno-semantic-interposition -fno-stack-protector -fno-trapping-math -ftree-loop-distribute-patterns -ftree-loop-vectorize -ftree-vectorize -funroll-loops -fuse-ld=bfd -fuse-linker-plugin -malign-data=cacheline -fno-common -feliminate-unused-debug-types -fipa-pta -flto=12 -fno-plt -mtls-dialect=gnu2 -Wl,-sort-common -Wno-error -Wp,-D_REENTRANT -pipe $PGO_USE"
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+#export CCACHE_DISABLE=1
+## altflags_pgo end
+export CFLAGS="${CFLAGS_GENERATE}"
+export CXXFLAGS="${CXXFLAGS_GENERATE}"
+export FFLAGS="${FFLAGS_GENERATE}"
+export FCFLAGS="${FCFLAGS_GENERATE}"
+export LDFLAGS="${LDFLAGS_GENERATE}"
+%configure  --enable-shared --enable-static
+## make_prepend content
+find . -type f -name 'Makefile*' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+#
+find . -type f -name 'libtool*' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+## make_prepend end
+make  %{?_smp_mflags}  V=1 VERBOSE=1
+
+make VERBOSE=1 V=1 check || :
+make distclean
+export CFLAGS="${CFLAGS_USE}"
+export CXXFLAGS="${CXXFLAGS_USE}"
+export FFLAGS="${FFLAGS_USE}"
+export FCFLAGS="${FCFLAGS_USE}"
+export LDFLAGS="${LDFLAGS_USE}"
+%configure  --enable-shared --enable-static
+## make_prepend content
+find . -type f -name 'Makefile*' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+#
+find . -type f -name 'libtool*' -exec sed -i 's/\-fPIC/\-fpic/g' {} \;
+## make_prepend end
+make  %{?_smp_mflags}  V=1 VERBOSE=1
 
 %check
 export LANG=C.UTF-8
-export http_proxy=http://127.0.0.1:9/
-export https_proxy=http://127.0.0.1:9/
-export no_proxy=localhost,127.0.0.1,0.0.0.0
+unset http_proxy
+unset https_proxy
+unset no_proxy
 # test suite is not parallel-safe
-make check
+make VERBOSE=1 V=1 check || :
 
 %install
-export SOURCE_DATE_EPOCH=1591761463
+export SOURCE_DATE_EPOCH=1591992155
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/package-licenses/bison
-cp %{_builddir}/bison-3.6.3/COPYING %{buildroot}/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
 %make_install
 %find_lang bison-gnulib
 %find_lang bison-runtime
@@ -197,14 +252,14 @@ cp %{_builddir}/bison-3.6.3/COPYING %{buildroot}/usr/share/package-licenses/biso
 %defattr(0644,root,root,0755)
 /usr/share/info/bison.info
 
-%files license
-%defattr(0644,root,root,0755)
-/usr/share/package-licenses/bison/8624bcdae55baeef00cd11d5dfcfa60f68710a02
-
 %files man
 %defattr(0644,root,root,0755)
 /usr/share/man/man1/bison.1
 /usr/share/man/man1/yacc.1
+
+%files staticdev
+%defattr(-,root,root,-)
+/usr/lib64/liby.a
 
 %files locales -f bison-gnulib.lang -f bison-runtime.lang -f bison.lang
 %defattr(-,root,root,-)
